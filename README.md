@@ -1,12 +1,13 @@
-# FUBINK - Advanced Roblox GUI Framework
+
+# FUBNIK - Advanced Roblox GUI Framework
 
 <div align="center">
 
-![Synapse UI Studio Banner](https://via.placeholder.com/800x200/1a1a2e/ffffff?text=Synapse+UI+Studio)
+![FUBNIK Framework](https://picsum.photos/id/104/800/200)
 
 **The Most Advanced Roblox GUI Framework for Professional Developers**
 
-[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/synapse-ui-studio)
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/fubnik-ui)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Roblox](https://img.shields.io/badge/Roblox-Studio-red.svg)](https://www.roblox.com/)
 
@@ -34,9 +35,9 @@
 
 ## 🎯 Overview
 
-**Synapse UI Studio** is a professional-grade Roblox GUI framework designed for developers who want to create stunning, modern interfaces with minimal effort. Built with performance and flexibility in mind, it provides a complete toolkit for building anything from simple menus to complex dashboard systems.
+**FUBNIK** is a professional-grade Roblox GUI framework designed for developers who want to create stunning, modern interfaces with minimal effort. Built with performance and flexibility in mind, it provides a complete toolkit for building anything from simple menus to complex dashboard systems.
 
-### Why Choose Synapse UI Studio?
+### Why Choose FUBNIK?
 
 - 🚀 **Production-Ready** - Used in professional Roblox games
 - 🎨 **Beautiful by Default** - Glassmorphism design with neon accents
@@ -93,11 +94,11 @@
 ### Method 1: Module Script (Recommended)
 
 ```lua
--- Place in a ModuleScript named "SynapseUI"
+-- Place in a ModuleScript named "FUBNIK"
 -- Then require it in your LocalScript
-local Library = require(script.Parent.SynapseUI)
+local FUBNIK = require(script.Parent.FUBNIK)
 
-local Window = Library:CreateWindow({
+local Window = FUBNIK:CreateWindow({
     Name = "My Awesome GUI"
 })
 ```
@@ -106,9 +107,9 @@ local Window = Library:CreateWindow({
 
 ```lua
 -- Paste this at the top of your LocalScript
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/synapse-ui-studio/main.lua"))()
+local FUBNIK = loadstring(game:HttpGet("https://raw.githubusercontent.com/fubnik/main.lua"))()
 
-local Window = Library:CreateWindow({
+local Window = FUBNIK:CreateWindow({
     Name = "My Awesome GUI"
 })
 ```
@@ -127,10 +128,10 @@ Here's a complete working example to get you started:
 
 ```lua
 -- Load the library
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/synapse-ui-studio/main.lua"))()
+local FUBNIK = loadstring(game:HttpGet("https://raw.githubusercontent.com/fubnik/main.lua"))()
 
 -- Create a window
-local Window = Library:CreateWindow({
+local Window = FUBNIK:CreateWindow({
     Name = "Admin Panel",
     Size = UDim2.new(0, 900, 0, 600)
 })
@@ -206,7 +207,7 @@ VisualSection:CreateColorPicker({
 ### Creating a Window
 
 ```lua
-local Window = Library:CreateWindow({
+local Window = FUBNIK:CreateWindow({
     Name = "Window Title",           -- Required: Window title
     Size = UDim2.new(0, 900, 0, 600) -- Optional: Default is 900x600
 })
@@ -380,7 +381,7 @@ Create beautiful animations with preset or custom tweens:
 
 ```lua
 -- Get animation preview for any GUI object
-local Animator = Library:CreateAnimationPreview(myButton)
+local Animator = FUBNIK:CreateAnimationPreview(myButton)
 
 -- Play preset animations
 Animator:PlayPreset("FadeIn")       -- Fade in animation
@@ -412,12 +413,12 @@ Switch between built-in themes or create your own:
 Window:SetTheme("Neon")     -- Dark, Light, Neon, Midnight
 
 -- Listen to theme changes
-Library.Theme:OnChange(function(themeName, themeData)
+FUBNIK.Theme:OnChange(function(themeName, themeData)
     print("Theme changed to:", themeName)
 end)
 
 -- Get current theme colors
-local theme = Library.Theme:Get()
+local theme = FUBNIK.Theme:Get()
 print(theme.Accent, theme.Background)
 ```
 
@@ -441,18 +442,18 @@ Save and load user preferences automatically:
 
 ```lua
 -- Config automatically saves when changed
-Library:SetTheme("Neon")               -- Saves automatically
+FUBNIK:SetTheme("Neon")               -- Saves automatically
 
 -- Manual save/load
-Library:SaveConfig()
-Library:LoadConfig()
+FUBNIK:SaveConfig()
+FUBNIK:LoadConfig()
 
 -- Export/Import
-local jsonData = Library:SaveConfig()
-Library:LoadConfig(jsonData)
+local jsonData = FUBNIK:SaveConfig()
+FUBNIK:LoadConfig(jsonData)
 
 -- Custom config values
-local ConfigManager = Library.Config
+local ConfigManager = FUBNIK.Config
 ConfigManager:Set("mySetting", true)
 local value = ConfigManager:Get("mySetting", false)
 ```
@@ -462,7 +463,7 @@ local value = ConfigManager:Get("mySetting", false)
 Built-in action history:
 
 ```lua
-local UndoRedo = Library.UndoRedo
+local UndoRedo = FUBNIK.UndoRedo
 
 -- Push an action
 UndoRedo:Push({
@@ -484,7 +485,7 @@ UndoRedo:Redo()
 Save entire UI layouts to JSON:
 
 ```lua
-local Serializer = Library.Serializer
+local Serializer = FUBNIK.Serializer
 
 -- Save a GUI object
 local data = Serializer:SerializeGuiObject(myWindow)
@@ -500,9 +501,9 @@ local newWindow = Serializer:DeserializeGuiObject(data, CoreGui)
 ### Complete Admin Panel
 
 ```lua
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/synapse-ui-studio/main.lua"))()
+local FUBNIK = loadstring(game:HttpGet("https://raw.githubusercontent.com/fubnik/main.lua"))()
 
-local AdminPanel = Library:CreateWindow({
+local AdminPanel = FUBNIK:CreateWindow({
     Name = "Admin Control Center",
     Size = UDim2.new(0, 1000, 0, 650)
 })
@@ -514,7 +515,6 @@ local PlayerSection = PlayerTab:CreateSection({Name = "Player Controls"})
 PlayerSection:CreateButton({
     Name = "Kick Player",
     Callback = function()
-        -- Implementation
         AdminPanel:Notify({
             Title = "Kicked",
             Message = "Player has been kicked",
@@ -543,7 +543,6 @@ ESPTab:CreateToggle({
     Default = false,
     Callback = function(state)
         espEnabled = state
-        -- Toggle ESP implementation
     end
 })
 
@@ -577,7 +576,7 @@ PremiumSection:CreateProductButton({
 ### Custom Animation Demo
 
 ```lua
-local DemoWindow = Library:CreateWindow({Name = "Animation Demo"})
+local DemoWindow = FUBNIK:CreateWindow({Name = "Animation Demo"})
 local AnimTab = DemoWindow:CreateTab({Name = "Animations"})
 local AnimSection = AnimTab:CreateSection({Name = "Tween Presets"})
 
@@ -593,7 +592,7 @@ local testButton = AnimSection:CreateButton({
 local buttonInstance = testButton.Instance
 
 -- Create animator
-local animator = Library:CreateAnimationPreview(buttonInstance)
+local animator = FUBNIK:CreateAnimationPreview(buttonInstance)
 
 -- Animation buttons
 AnimSection:CreateButton({
@@ -629,7 +628,7 @@ AnimSection:CreateButton({
 Window:Destroy()
 
 -- Or use the connection manager
-local ConnectionManager = Library.ConnectionManager
+local ConnectionManager = FUBNIK.ConnectionManager
 local id = ConnectionManager:Add(someConnection)
 ConnectionManager:Remove(id)
 ConnectionManager:Cleanup()
@@ -640,7 +639,7 @@ ConnectionManager:Cleanup()
 ```lua
 -- Reuse windows instead of recreating
 if not myWindow then
-    myWindow = Library:CreateWindow({Name = "My Panel"})
+    myWindow = FUBNIK:CreateWindow({Name = "My Panel"})
 end
 myWindow.MainFrame.Visible = true
 
@@ -674,7 +673,7 @@ end
 
 ```lua
 -- Use theme colors for custom elements
-local theme = Library.Theme:Get()
+local theme = FUBNIK.Theme:Get()
 myCustomFrame.BackgroundColor3 = theme.Surface
 myCustomFrame.BorderColor3 = theme.Border
 ```
@@ -684,7 +683,7 @@ myCustomFrame.BorderColor3 = theme.Border
 ## ❓ FAQ
 
 ### Q: Is this framework free to use?
-**A:** Yes! Synapse UI Studio is completely free for both personal and commercial use.
+**A:** Yes! FUBNIK is completely free for both personal and commercial use.
 
 ### Q: Can I use this in my Roblox game?
 **A:** Absolutely! The framework is designed for Roblox Studio and works perfectly in any Roblox game.
@@ -739,6 +738,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Made with ❤️ for Roblox Developers**
 
-[Report Bug](https://github.com/synapse-ui-studio/issues) · [Request Feature](https://github.com/synapse-ui-studio/issues) · [Join Discord](https://discord.gg/synapse-ui)
+[Report Bug](https://github.com/fubnik/issues) · [Request Feature](https://github.com/fubnik/issues) · [Join Discord](https://discord.gg/fubnik)
 
 </div>
+```
