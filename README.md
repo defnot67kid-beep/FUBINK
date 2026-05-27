@@ -1,5 +1,4 @@
-# FUBINK
-# Synapse UI Studio - Advanced Roblox GUI Framework
+# FUBINK - Advanced Roblox GUI Framework
 
 <div align="center">
 
