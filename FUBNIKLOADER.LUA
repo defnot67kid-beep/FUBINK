@@ -1,4 +1,4 @@
- --[[
+--[[
     ╔═══════════════════════════════════════════════════════════╗
     ║                                                           ║
     ║   ███████╗██╗   ██╗██████╗ ███╗   ██╗██╗██╗  ██╗         ║
@@ -218,7 +218,7 @@ local function Notify(title, msg, typ, duration)
 end
 
 -- ============================================================================
--- LOADING SCREEN
+-- LOADING SCREEN (Used by Hub creation - no pre-tabs)
 -- ============================================================================
 local function ShowLoading(message, duration)
     local screenGui = Instance.new("ScreenGui")
@@ -335,12 +335,13 @@ function Hub:CreateWindow(name, customWidth, customHeight)
     closeBtn.BackgroundTransparency = 1
     closeBtn.Parent = titleBar
     
-    -- Tabs container (sidebar)
+    -- Tabs container (sidebar) - FIXED: Added proper sizing and clipping
     local tabsFrame = Instance.new("Frame")
     tabsFrame.Size = UDim2.new(0, Device.SidebarWidth, 1, -45)
     tabsFrame.Position = UDim2.new(0, 0, 0, 45)
     tabsFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
     tabsFrame.BackgroundTransparency = 0.5
+    tabsFrame.ClipsDescendants = true -- Prevents overflow
     tabsFrame.Parent = main
     
     local tabList = Instance.new("ScrollingFrame")
@@ -349,13 +350,19 @@ function Hub:CreateWindow(name, customWidth, customHeight)
     tabList.BackgroundTransparency = 1
     tabList.BorderSizePixel = 0
     tabList.ScrollBarThickness = 2
+    tabList.CanvasSize = UDim2.new(0, 0, 0, 0)
     tabList.Parent = tabsFrame
     
     local tabLayout = Instance.new("UIListLayout")
     tabLayout.Padding = UDim.new(0, 5)
     tabLayout.Parent = tabList
     
-    -- Content area
+    -- Update canvas size when layout changes
+    tabLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        tabList.CanvasSize = UDim2.new(0, 0, 0, tabLayout.AbsoluteContentSize.Y + 10)
+    end)
+    
+    -- Content area - FIXED: Proper position to prevent overlap
     local contentFrame = Instance.new("Frame")
     contentFrame.Size = UDim2.new(1, -(Device.SidebarWidth + 15), 1, -55)
     contentFrame.Position = UDim2.new(0, Device.SidebarWidth + 10, 0, 50)
@@ -786,7 +793,8 @@ function Hub:CreateWindow(name, customWidth, customHeight)
                 end)
                 
                 -- Close dropdown when clicking elsewhere
-                UIS.InputBegan:Connect(function(input)
+                local conn
+                conn = UIS.InputBegan:Connect(function(input)
                     if listVisible and input.UserInputType == Enum.UserInputType.MouseButton1 then
                         local mousePos = input.Position
                         local btnPos = dropdownBtn.AbsolutePosition
@@ -828,7 +836,7 @@ function Hub:CreateWindow(name, customWidth, customHeight)
         
         table.insert(self.tabs, tab)
         
-        -- Select first tab
+        -- Select first tab (only after all tabs are added, no pre-tabs)
         if #self.tabs == 1 then
             tabContent.Visible = true
             Tween(btn, {BackgroundColor3 = Color3.fromRGB(40, 40, 70), TextColor3 = Color3.fromRGB(255, 255, 255)}, 0.1)
@@ -839,13 +847,20 @@ function Hub:CreateWindow(name, customWidth, customHeight)
     end
     
     function window:AddUserInfo()
+        -- Create container frame that holds user info
+        local container = Instance.new("Frame")
+        container.Size = UDim2.new(1, -20, 0, 0)
+        container.Position = UDim2.new(0, 10, 0, 0)
+        container.BackgroundTransparency = 1
+        container.AutomaticSize = Enum.AutomaticSize.Y
+        container.Parent = self.contentFrame
+        
         local frame = Instance.new("Frame")
-        frame.Size = UDim2.new(1, -20, 0, 90)
-        frame.Position = UDim2.new(0, 10, 0, 0)
+        frame.Size = UDim2.new(1, 0, 0, 90)
         frame.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
         MakeRounded(frame, 10)
         MakeStroke(frame, 1, Color3.fromRGB(80, 80, 120))
-        frame.Parent = self.contentFrame
+        frame.Parent = container
         
         -- Avatar circle
         local avatar = Instance.new("Frame")
@@ -900,7 +915,7 @@ function Hub:CreateWindow(name, customWidth, customHeight)
         idLabel.BackgroundTransparency = 1
         idLabel.Parent = frame
         
-        return frame
+        return container
     end
     
     function window:Notify(title, msg, typ, duration)
@@ -935,8 +950,15 @@ print("Screen: " .. Device.ScreenWidth .. "x" .. Device.ScreenHeight)
 print("Window: " .. autoWidth .. "x" .. autoHeight)
 print("========================================")
 
+-- Show loading screen while hub initializes (no pre-tabs, just loader)
+local initialLoader = ShowLoading("Initializing FUBNIK Hub...", 1.5)
+
 -- Create window with auto-scaling (no manual sizes needed!)
 local HubWindow = Hub:CreateWindow("FUBNIK Hub")
+
+-- Small delay to ensure loader shows before hiding
+task.wait(0.5)
+initialLoader:Hide()
 
 -- Show device info on startup
 HubWindow:Notify("Auto Scaling Active", "Detected: " .. Device.Type .. " | Size: " .. autoWidth .. "x" .. autoHeight, "success", 4)
@@ -944,8 +966,10 @@ HubWindow:Notify("Auto Scaling Active", "Detected: " .. Device.Type .. " | Size:
 -- ========== TAB 1: HOME ==========
 local HomeTab = HubWindow:AddTab("Home", "🏠")
 
--- User info auto-displays
-HubWindow:AddUserInfo()
+-- User info auto-displays (now properly inside HomeTab's content area)
+HomeTab.content:ClearAllChildren()
+local userInfoContainer = HubWindow:AddUserInfo()
+userInfoContainer.Parent = HomeTab.content
 
 local InfoSection = HomeTab:AddSection("Device Info")
 InfoSection:AddLabel("Device Type: " .. Device.Type)
@@ -959,7 +983,9 @@ QuickSection:AddButton("Test Notification", function()
 end)
 
 QuickSection:AddButton("Show Loading", function()
-    HubWindow:ShowLoading("Testing on " .. Device.Type, 1.5)
+    local loader = HubWindow:ShowLoading("Testing on " .. Device.Type, 1.5)
+    task.wait(1.5)
+    loader:Hide()
 end)
 
 -- ========== TAB 2: PLAYER ==========
@@ -1041,14 +1067,16 @@ local UtilityTab = HubWindow:AddTab("Utility", "🔧")
 
 local ServerSection = UtilityTab:AddSection("Server")
 ServerSection:AddButton("Rejoin Game", function()
-    HubWindow:ShowLoading("Rejoining...", 1)
+    local loader = HubWindow:ShowLoading("Rejoining...", 1)
     task.wait(1)
+    loader:Hide()
     TPS:Teleport(game.PlaceId, LP)
 end)
 
 ServerSection:AddButton("Server Hop", function()
-    HubWindow:ShowLoading("Finding new server...", 1)
+    local loader = HubWindow:ShowLoading("Finding new server...", 1)
     task.wait(1)
+    loader:Hide()
     TPS:Teleport(game.PlaceId)
 end)
 
