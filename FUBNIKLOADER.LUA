@@ -8,10 +8,97 @@
     ║   ██║     ╚██████╔╝██████╔╝██║ ╚████║██║██╔╝ ██╗          ║
     ║   ╚═╝      ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝          ║
     ║                                                           ║
-    ║              SIMPLE SCRIPT HUB v1.0                       ║
-    ║         Clean | Works 100% | No Errors | Fast             ║
+    ║         FUBNIK v6.0 - AUTO SCALING                        ║
+    ║    Automatically detects device and scales perfectly      ║
     ╚═══════════════════════════════════════════════════════════╝
 --]]
+
+-- ============================================================================
+-- AUTO DEVICE DETECTION & SCALING
+-- ============================================================================
+local Device = {
+    Type = "Unknown",
+    ScreenWidth = 0,
+    ScreenHeight = 0,
+    Scale = 1,
+    RecommendedWidth = 0,
+    RecommendedHeight = 0,
+    ButtonHeight = 0,
+    FontSize = 0,
+    SidebarWidth = 0,
+    Padding = 0
+}
+
+-- Auto detect device and calculate perfect sizes
+function Device:Detect()
+    local camera = workspace.CurrentCamera
+    self.ScreenWidth = camera.ViewportSize.X
+    self.ScreenHeight = camera.ViewportSize.Y
+    local isMobile = game:GetService("UserInputService").TouchEnabled
+    local aspectRatio = self.ScreenWidth / self.ScreenHeight
+    
+    -- Detect device type
+    if isMobile then
+        self.Type = "Mobile"
+        -- Mobile gets smaller, touch-friendly UI
+        self.RecommendedWidth = math.min(360, self.ScreenWidth - 20)
+        self.RecommendedHeight = math.min(600, self.ScreenHeight - 80)
+        self.ButtonHeight = 44
+        self.FontSize = 14
+        self.SidebarWidth = 120
+        self.Padding = 12
+        self.Scale = 0.9
+    elseif aspectRatio > 1.6 then
+        self.Type = "Desktop Wide"
+        self.RecommendedWidth = math.min(450, self.ScreenWidth * 0.35)
+        self.RecommendedHeight = math.min(650, self.ScreenHeight - 100)
+        self.ButtonHeight = 45
+        self.FontSize = 14
+        self.SidebarWidth = 140
+        self.Padding = 15
+        self.Scale = 1
+    elseif aspectRatio > 1.3 then
+        self.Type = "Desktop"
+        self.RecommendedWidth = math.min(420, self.ScreenWidth * 0.4)
+        self.RecommendedHeight = math.min(620, self.ScreenHeight - 100)
+        self.ButtonHeight = 42
+        self.FontSize = 13
+        self.SidebarWidth = 135
+        self.Padding = 12
+        self.Scale = 1
+    else
+        self.Type = "Tablet"
+        self.RecommendedWidth = math.min(500, self.ScreenWidth - 40)
+        self.RecommendedHeight = math.min(700, self.ScreenHeight - 80)
+        self.ButtonHeight = 48
+        self.FontSize = 15
+        self.SidebarWidth = 150
+        self.Padding = 15
+        self.Scale = 1.1
+    end
+    
+    print(string.format("[FUBNIK] Device Detected: %s | Size: %dx%d | Scale: %.2f", 
+        self.Type, self.RecommendedWidth, self.RecommendedHeight, self.Scale))
+    
+    return self
+end
+
+-- Get recommended window size (auto-scales)
+function Device:GetWindowSize()
+    return self.RecommendedWidth, self.RecommendedHeight
+end
+
+-- Get button height for current device
+function Device:GetButtonHeight()
+    return self.ButtonHeight
+end
+
+-- Get font size for current device
+function Device:GetFontSize(baseSize)
+    return math.floor(baseSize * (self.FontSize / 13))
+end
+
+Device:Detect()
 
 -- ============================================================================
 -- SERVICES
@@ -131,16 +218,81 @@ local function Notify(title, msg, typ, duration)
 end
 
 -- ============================================================================
--- SIMPLE GUI CREATOR
+-- LOADING SCREEN
+-- ============================================================================
+local function ShowLoading(message, duration)
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "LoadingScreen"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = CG
+    
+    local overlay = Instance.new("Frame")
+    overlay.Size = UDim2.new(1, 0, 1, 0)
+    overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    overlay.BackgroundTransparency = 0.5
+    overlay.Parent = screenGui
+    
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 250, 0, 120)
+    frame.Position = UDim2.new(0.5, -125, 0.5, -60)
+    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+    MakeRounded(frame, 12)
+    MakeStroke(frame, 1, Color3.fromRGB(100, 100, 255))
+    frame.Parent = overlay
+    
+    local text = Instance.new("TextLabel")
+    text.Size = UDim2.new(1, -20, 0, 40)
+    text.Position = UDim2.new(0, 10, 0, 10)
+    text.Text = message or "Loading..."
+    text.TextColor3 = Color3.fromRGB(255, 255, 255)
+    text.TextSize = 16
+    text.Font = Enum.Font.GothamBold
+    text.BackgroundTransparency = 1
+    text.Parent = frame
+    
+    local spinner = Instance.new("Frame")
+    spinner.Size = UDim2.new(0, 30, 0, 30)
+    spinner.Position = UDim2.new(0.5, -15, 0, 60)
+    spinner.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
+    MakeRounded(spinner, 15)
+    spinner.Parent = frame
+    
+    local spin = 0
+    local conn
+    conn = game:GetService("RunService").RenderStepped:Connect(function()
+        spin = spin + 10
+        spinner.Rotation = spin
+    end)
+    
+    if duration then
+        task.spawn(function()
+            task.wait(duration)
+            conn:Disconnect()
+            screenGui:Destroy()
+        end)
+    end
+    
+    return {
+        Hide = function()
+            conn:Disconnect()
+            screenGui:Destroy()
+        end
+    }
+end
+
+-- ============================================================================
+-- SIMPLE GUI CREATOR WITH AUTO SCALING
 -- ============================================================================
 local Hub = {
     windows = {},
-    currentWindow = nil
+    currentWindow = nil,
+    Device = Device
 }
 
-function Hub:CreateWindow(name, width, height)
-    width = width or 400
-    height = height or 550
+function Hub:CreateWindow(name, customWidth, customHeight)
+    -- Use auto-detected sizes if no custom sizes provided
+    local width = customWidth or Device.RecommendedWidth
+    local height = customHeight or Device.RecommendedHeight
     
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "ScriptHub_" .. tostring(os.time())
@@ -164,9 +316,9 @@ function Hub:CreateWindow(name, width, height)
     local titleText = Instance.new("TextLabel")
     titleText.Size = UDim2.new(1, -50, 1, 0)
     titleText.Position = UDim2.new(0, 15, 0, 0)
-    titleText.Text = name
+    titleText.Text = name .. " (" .. Device.Type .. ")"
     titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    titleText.TextSize = 16
+    titleText.TextSize = Device.FontSize
     titleText.Font = Enum.Font.GothamBold
     titleText.TextXAlignment = Enum.TextXAlignment.Left
     titleText.BackgroundTransparency = 1
@@ -185,7 +337,7 @@ function Hub:CreateWindow(name, width, height)
     
     -- Tabs container (sidebar)
     local tabsFrame = Instance.new("Frame")
-    tabsFrame.Size = UDim2.new(0, 120, 1, -45)
+    tabsFrame.Size = UDim2.new(0, Device.SidebarWidth, 1, -45)
     tabsFrame.Position = UDim2.new(0, 0, 0, 45)
     tabsFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
     tabsFrame.BackgroundTransparency = 0.5
@@ -205,8 +357,8 @@ function Hub:CreateWindow(name, width, height)
     
     -- Content area
     local contentFrame = Instance.new("Frame")
-    contentFrame.Size = UDim2.new(1, -135, 1, -55)
-    contentFrame.Position = UDim2.new(0, 130, 0, 50)
+    contentFrame.Size = UDim2.new(1, -(Device.SidebarWidth + 15), 1, -55)
+    contentFrame.Position = UDim2.new(0, Device.SidebarWidth + 10, 0, 50)
     contentFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
     contentFrame.BackgroundTransparency = 0.3
     MakeRounded(contentFrame, 8)
@@ -217,7 +369,7 @@ function Hub:CreateWindow(name, width, height)
     local dragStart, startPos
     
     titleBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
             startPos = main.Position
@@ -225,19 +377,23 @@ function Hub:CreateWindow(name, width, height)
     end)
     
     UIS.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - dragStart
             main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
     
     UIS.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = false
         end
     end)
     
     closeBtn.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
+    
+    closeBtn.TouchTap:Connect(function()
         screenGui:Destroy()
     end)
     
@@ -248,17 +404,18 @@ function Hub:CreateWindow(name, width, height)
         tabList = tabList,
         tabLayout = tabLayout,
         tabs = {},
-        currentTab = nil
+        currentTab = nil,
+        device = Device
     }
     
     function window:AddTab(name, icon)
         icon = icon or ""
         local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, -10, 0, 40)
+        btn.Size = UDim2.new(1, -10, 0, Device.ButtonHeight)
         btn.Position = UDim2.new(0, 5, 0, 0)
         btn.Text = icon ~= "" and (icon .. "  " .. name) or name
         btn.TextColor3 = Color3.fromRGB(180, 180, 210)
-        btn.TextSize = 12
+        btn.TextSize = Device.FontSize - 1
         btn.Font = Enum.Font.Gotham
         btn.TextXAlignment = Enum.TextXAlignment.Left
         btn.BackgroundTransparency = 1
@@ -295,6 +452,17 @@ function Hub:CreateWindow(name, width, height)
             btn.BackgroundTransparency = 0.1
         end)
         
+        btn.TouchTap:Connect(function()
+            for _, t in pairs(self.tabs) do
+                t.content.Visible = false
+                Tween(t.button, {BackgroundColor3 = Color3.fromRGB(0, 0, 0), TextColor3 = Color3.fromRGB(180, 180, 210)}, 0.1)
+                t.button.BackgroundTransparency = 1
+            end
+            tabContent.Visible = true
+            Tween(btn, {BackgroundColor3 = Color3.fromRGB(40, 40, 70), TextColor3 = Color3.fromRGB(255, 255, 255)}, 0.1)
+            btn.BackgroundTransparency = 0.1
+        end)
+        
         local tab = {
             button = btn,
             content = tabContent,
@@ -313,7 +481,7 @@ function Hub:CreateWindow(name, width, height)
             header.Size = UDim2.new(1, 0, 0, 30)
             header.Text = title
             header.TextColor3 = Color3.fromRGB(100, 100, 255)
-            header.TextSize = 14
+            header.TextSize = Device.FontSize
             header.Font = Enum.Font.GothamBold
             header.TextXAlignment = Enum.TextXAlignment.Left
             header.BackgroundTransparency = 1
@@ -345,10 +513,10 @@ function Hub:CreateWindow(name, width, height)
             
             function section:AddButton(text, callback)
                 local btn = Instance.new("TextButton")
-                btn.Size = UDim2.new(1, 0, 0, 40)
+                btn.Size = UDim2.new(1, 0, 0, Device.ButtonHeight)
                 btn.Text = text
                 btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-                btn.TextSize = 13
+                btn.TextSize = Device.FontSize - 1
                 btn.Font = Enum.Font.GothamSemibold
                 btn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
                 MakeRounded(btn, 8)
@@ -365,7 +533,10 @@ function Hub:CreateWindow(name, width, height)
                 
                 btn.MouseButton1Click:Connect(function()
                     if callback then callback() end
-                    Notify(text, "Executed!", "success", 1.5)
+                end)
+                
+                btn.TouchTap:Connect(function()
+                    if callback then callback() end
                 end)
                 
                 table.insert(section.elements, btn)
@@ -374,7 +545,7 @@ function Hub:CreateWindow(name, width, height)
             
             function section:AddToggle(text, default, callback)
                 local frame = Instance.new("Frame")
-                frame.Size = UDim2.new(1, 0, 0, 40)
+                frame.Size = UDim2.new(1, 0, 0, Device.ButtonHeight)
                 frame.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
                 MakeRounded(frame, 8)
                 MakeStroke(frame, 1, Color3.fromRGB(80, 80, 120))
@@ -385,7 +556,7 @@ function Hub:CreateWindow(name, width, height)
                 label.Position = UDim2.new(0, 12, 0, 0)
                 label.Text = text
                 label.TextColor3 = Color3.fromRGB(255, 255, 255)
-                label.TextSize = 13
+                label.TextSize = Device.FontSize - 1
                 label.Font = Enum.Font.Gotham
                 label.TextXAlignment = Enum.TextXAlignment.Left
                 label.BackgroundTransparency = 1
@@ -408,13 +579,15 @@ function Hub:CreateWindow(name, width, height)
                 
                 local state = default
                 
-                toggleBtn.MouseButton1Click:Connect(function()
+                local function toggle()
                     state = not state
                     Tween(toggleBtn, {BackgroundColor3 = state and Color3.fromRGB(100, 100, 255) or Color3.fromRGB(80, 80, 120)}, 0.2)
                     Tween(knob, {Position = UDim2.new(0, state and 26 or 2, 0.5, -11)}, 0.2)
                     if callback then callback(state) end
-                    Notify(text, state and "Enabled" or "Disabled", state and "success" or "info", 1)
-                end)
+                end
+                
+                toggleBtn.MouseButton1Click:Connect(toggle)
+                toggleBtn.TouchTap:Connect(toggle)
                 
                 table.insert(section.elements, {frame = frame, toggle = toggleBtn, state = state})
                 return {setValue = function(v) 
@@ -427,7 +600,7 @@ function Hub:CreateWindow(name, width, height)
             
             function section:AddSlider(text, min, max, default, callback)
                 local frame = Instance.new("Frame")
-                frame.Size = UDim2.new(1, 0, 0, 70)
+                frame.Size = UDim2.new(1, 0, 0, 75)
                 frame.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
                 MakeRounded(frame, 8)
                 MakeStroke(frame, 1, Color3.fromRGB(80, 80, 120))
@@ -438,7 +611,7 @@ function Hub:CreateWindow(name, width, height)
                 label.Position = UDim2.new(0, 12, 0, 5)
                 label.Text = text
                 label.TextColor3 = Color3.fromRGB(255, 255, 255)
-                label.TextSize = 13
+                label.TextSize = Device.FontSize - 1
                 label.Font = Enum.Font.GothamSemibold
                 label.TextXAlignment = Enum.TextXAlignment.Left
                 label.BackgroundTransparency = 1
@@ -449,7 +622,7 @@ function Hub:CreateWindow(name, width, height)
                 valueLabel.Position = UDim2.new(1, -72, 0, 5)
                 valueLabel.Text = tostring(default)
                 valueLabel.TextColor3 = Color3.fromRGB(100, 100, 255)
-                valueLabel.TextSize = 12
+                valueLabel.TextSize = Device.FontSize - 2
                 valueLabel.Font = Enum.Font.GothamBold
                 valueLabel.TextXAlignment = Enum.TextXAlignment.Right
                 valueLabel.BackgroundTransparency = 1
@@ -457,7 +630,7 @@ function Hub:CreateWindow(name, width, height)
                 
                 local sliderBg = Instance.new("Frame")
                 sliderBg.Size = UDim2.new(1, -24, 0, 4)
-                sliderBg.Position = UDim2.new(0, 12, 0, 45)
+                sliderBg.Position = UDim2.new(0, 12, 0, 48)
                 sliderBg.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
                 MakeRounded(sliderBg, 2)
                 sliderBg.Parent = frame
@@ -470,10 +643,10 @@ function Hub:CreateWindow(name, width, height)
                 fill.Parent = sliderBg
                 
                 local knob = Instance.new("Frame")
-                knob.Size = UDim2.new(0, 16, 0, 16)
-                knob.Position = UDim2.new(percent, -8, 0.5, -8)
+                knob.Size = UDim2.new(0, 18, 0, 18)
+                knob.Position = UDim2.new(percent, -9, 0.5, -9)
                 knob.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
-                MakeRounded(knob, 8)
+                MakeRounded(knob, 9)
                 knob.Parent = sliderBg
                 
                 local dragging = false
@@ -485,30 +658,30 @@ function Hub:CreateWindow(name, width, height)
                     value = math.floor(newVal + 0.5)
                     valueLabel.Text = tostring(value)
                     fill.Size = UDim2.new(relative, 0, 1, 0)
-                    knob.Position = UDim2.new(relative, -8, 0.5, -8)
+                    knob.Position = UDim2.new(relative, -9, 0.5, -9)
                     if callback then callback(value) end
                 end
                 
                 knob.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                         dragging = true
                     end
                 end)
                 
                 UIS.InputChanged:Connect(function(input)
-                    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
                         update(input)
                     end
                 end)
                 
                 UIS.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                         dragging = false
                     end
                 end)
                 
                 sliderBg.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                         update(input)
                         dragging = true
                     end
@@ -520,8 +693,117 @@ function Hub:CreateWindow(name, width, height)
                     local p = (value - min) / (max - min)
                     valueLabel.Text = tostring(value)
                     fill.Size = UDim2.new(p, 0, 1, 0)
-                    knob.Position = UDim2.new(p, -8, 0.5, -8)
+                    knob.Position = UDim2.new(p, -9, 0.5, -9)
                     if callback then callback(value) end
+                end}
+            end
+            
+            function section:AddDropdown(text, options, default, callback)
+                local frame = Instance.new("Frame")
+                frame.Size = UDim2.new(1, 0, 0, Device.ButtonHeight)
+                frame.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
+                MakeRounded(frame, 8)
+                MakeStroke(frame, 1, Color3.fromRGB(80, 80, 120))
+                frame.Parent = elementsFrame
+                
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(1, -110, 1, 0)
+                label.Position = UDim2.new(0, 12, 0, 0)
+                label.Text = text
+                label.TextColor3 = Color3.fromRGB(255, 255, 255)
+                label.TextSize = Device.FontSize - 1
+                label.Font = Enum.Font.Gotham
+                label.TextXAlignment = Enum.TextXAlignment.Left
+                label.BackgroundTransparency = 1
+                label.Parent = frame
+                
+                local dropdownBtn = Instance.new("TextButton")
+                dropdownBtn.Size = UDim2.new(0, 100, 0, 32)
+                dropdownBtn.Position = UDim2.new(1, -110, 0.5, -16)
+                dropdownBtn.Text = default or options[1]
+                dropdownBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                dropdownBtn.TextSize = Device.FontSize - 2
+                dropdownBtn.Font = Enum.Font.Gotham
+                dropdownBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+                MakeRounded(dropdownBtn, 6)
+                dropdownBtn.Parent = frame
+                
+                local arrow = Instance.new("TextLabel")
+                arrow.Size = UDim2.new(0, 25, 1, 0)
+                arrow.Position = UDim2.new(1, -25, 0, 0)
+                arrow.Text = "▼"
+                arrow.TextColor3 = Color3.fromRGB(180, 180, 210)
+                arrow.TextSize = 10
+                arrow.BackgroundTransparency = 1
+                arrow.Parent = dropdownBtn
+                
+                local listVisible = false
+                local list = nil
+                
+                dropdownBtn.MouseButton1Click:Connect(function()
+                    if list then list:Destroy() end
+                    listVisible = true
+                    
+                    list = Instance.new("ScrollingFrame")
+                    list.Size = UDim2.new(0, 120, 0, 0)
+                    list.Position = UDim2.new(1, -130, 0, 45)
+                    list.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+                    MakeRounded(list, 6)
+                    MakeStroke(list, 1, Color3.fromRGB(80, 80, 120))
+                    list.ScrollBarThickness = 2
+                    list.ClipsDescendants = true
+                    list.Parent = frame
+                    
+                    local listLayout = Instance.new("UIListLayout")
+                    listLayout.Padding = UDim.new(0, 2)
+                    listLayout.Parent = list
+                    
+                    local height = 0
+                    for _, opt in ipairs(options) do
+                        local optBtn = Instance.new("TextButton")
+                        optBtn.Size = UDim2.new(1, -10, 0, 32)
+                        optBtn.Position = UDim2.new(0, 5, 0, height)
+                        optBtn.Text = opt
+                        optBtn.TextColor3 = Color3.fromRGB(200, 200, 220)
+                        optBtn.TextSize = Device.FontSize - 2
+                        optBtn.Font = Enum.Font.Gotham
+                        optBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+                        MakeRounded(optBtn, 4)
+                        optBtn.Parent = list
+                        
+                        optBtn.MouseButton1Click:Connect(function()
+                            dropdownBtn.Text = opt
+                            if callback then callback(opt) end
+                            list:Destroy()
+                            listVisible = false
+                        end)
+                        
+                        height = height + 34
+                    end
+                    
+                    list.CanvasSize = UDim2.new(0, 0, 0, height)
+                    list.Size = UDim2.new(0, 120, 0, math.min(height, 150))
+                end)
+                
+                -- Close dropdown when clicking elsewhere
+                UIS.InputBegan:Connect(function(input)
+                    if listVisible and input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        local mousePos = input.Position
+                        local btnPos = dropdownBtn.AbsolutePosition
+                        local listPos = list and list.AbsolutePosition
+                        
+                        if not (mousePos.X >= btnPos.X and mousePos.X <= btnPos.X + 100 and
+                               mousePos.Y >= btnPos.Y and mousePos.Y <= btnPos.Y + 32) then
+                            if list then list:Destroy() end
+                            listVisible = false
+                        end
+                    end
+                end)
+                
+                table.insert(section.elements, frame)
+                return {setValue = function(val)
+                    dropdownBtn.Text = val
+                    if callback then callback(val) end
                 end}
             end
             
@@ -531,7 +813,7 @@ function Hub:CreateWindow(name, width, height)
                 label.Position = UDim2.new(0, 12, 0, 0)
                 label.Text = text
                 label.TextColor3 = Color3.fromRGB(180, 180, 210)
-                label.TextSize = 11
+                label.TextSize = Device.FontSize - 2
                 label.Font = Enum.Font.Gotham
                 label.TextXAlignment = Enum.TextXAlignment.Left
                 label.BackgroundTransparency = 1
@@ -556,8 +838,81 @@ function Hub:CreateWindow(name, width, height)
         return tab
     end
     
+    function window:AddUserInfo()
+        local frame = Instance.new("Frame")
+        frame.Size = UDim2.new(1, -20, 0, 90)
+        frame.Position = UDim2.new(0, 10, 0, 0)
+        frame.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
+        MakeRounded(frame, 10)
+        MakeStroke(frame, 1, Color3.fromRGB(80, 80, 120))
+        frame.Parent = self.contentFrame
+        
+        -- Avatar circle
+        local avatar = Instance.new("Frame")
+        avatar.Size = UDim2.new(0, 55, 0, 55)
+        avatar.Position = UDim2.new(0, 12, 0, 17)
+        avatar.BackgroundColor3 = Color3.fromRGB(55, 55, 85)
+        MakeRounded(avatar, 27)
+        MakeStroke(avatar, 2, Color3.fromRGB(100, 100, 255))
+        avatar.Parent = frame
+        
+        local avatarText = Instance.new("TextLabel")
+        avatarText.Size = UDim2.new(1, 0, 1, 0)
+        avatarText.Text = "👤"
+        avatarText.TextSize = 28
+        avatarText.TextColor3 = Color3.fromRGB(255, 255, 255)
+        avatarText.BackgroundTransparency = 1
+        avatarText.Parent = avatar
+        
+        -- Username
+        local nameLabel = Instance.new("TextLabel")
+        nameLabel.Size = UDim2.new(1, -85, 0, 28)
+        nameLabel.Position = UDim2.new(0, 80, 0, 12)
+        nameLabel.Text = LP.Name
+        nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        nameLabel.TextSize = Device.FontSize + 1
+        nameLabel.Font = Enum.Font.GothamBold
+        nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Parent = frame
+        
+        -- Display name
+        local displayLabel = Instance.new("TextLabel")
+        displayLabel.Size = UDim2.new(1, -85, 0, 20)
+        displayLabel.Position = UDim2.new(0, 80, 0, 40)
+        displayLabel.Text = "@" .. (LP.DisplayName or LP.Name)
+        displayLabel.TextColor3 = Color3.fromRGB(180, 180, 210)
+        displayLabel.TextSize = Device.FontSize - 2
+        displayLabel.Font = Enum.Font.Gotham
+        displayLabel.TextXAlignment = Enum.TextXAlignment.Left
+        displayLabel.BackgroundTransparency = 1
+        displayLabel.Parent = frame
+        
+        -- User ID
+        local idLabel = Instance.new("TextLabel")
+        idLabel.Size = UDim2.new(1, -85, 0, 18)
+        idLabel.Position = UDim2.new(0, 80, 0, 60)
+        idLabel.Text = "ID: " .. LP.UserId
+        idLabel.TextColor3 = Color3.fromRGB(150, 150, 180)
+        idLabel.TextSize = Device.FontSize - 3
+        idLabel.Font = Enum.Font.Gotham
+        idLabel.TextXAlignment = Enum.TextXAlignment.Left
+        idLabel.BackgroundTransparency = 1
+        idLabel.Parent = frame
+        
+        return frame
+    end
+    
     function window:Notify(title, msg, typ, duration)
         Notify(title, msg, typ, duration)
+    end
+    
+    function window:ShowLoading(message, duration)
+        return ShowLoading(message, duration)
+    end
+    
+    function window:GetDeviceInfo()
+        return Device.Type, Device.RecommendedWidth, Device.RecommendedHeight
     end
     
     table.insert(Hub.windows, window)
@@ -567,39 +922,86 @@ function Hub:CreateWindow(name, width, height)
 end
 
 -- ============================================================================
--- CREATE THE SCRIPT HUB
+-- CREATE THE SCRIPT HUB (AUTO-SCALED)
 -- ============================================================================
-local HubWindow = Hub:CreateWindow("Script Hub Pro", 400, 600)
 
--- ========== TAB 1: PLAYER ==========
+-- Get auto-detected sizes
+local autoWidth, autoHeight = Device.GetWindowSize(Device)
+
+print("========================================")
+print("FUBNIK v6.0 - Auto Scaling Active")
+print("Device: " .. Device.Type)
+print("Screen: " .. Device.ScreenWidth .. "x" .. Device.ScreenHeight)
+print("Window: " .. autoWidth .. "x" .. autoHeight)
+print("========================================")
+
+-- Create window with auto-scaling (no manual sizes needed!)
+local HubWindow = Hub:CreateWindow("FUBNIK Hub")
+
+-- Show device info on startup
+HubWindow:Notify("Auto Scaling Active", "Detected: " .. Device.Type .. " | Size: " .. autoWidth .. "x" .. autoHeight, "success", 4)
+
+-- ========== TAB 1: HOME ==========
+local HomeTab = HubWindow:AddTab("Home", "🏠")
+
+-- User info auto-displays
+HubWindow:AddUserInfo()
+
+local InfoSection = HomeTab:AddSection("Device Info")
+InfoSection:AddLabel("Device Type: " .. Device.Type)
+InfoSection:AddLabel("Screen Size: " .. Device.ScreenWidth .. "x" .. Device.ScreenHeight)
+InfoSection:AddLabel("Window Size: " .. autoWidth .. "x" .. autoHeight)
+InfoSection:AddLabel("Scale Factor: " .. string.format("%.2f", Device.Scale))
+
+local QuickSection = HomeTab:AddSection("Quick Actions")
+QuickSection:AddButton("Test Notification", function()
+    HubWindow:Notify("Test", "Notification works on " .. Device.Type, "success", 2)
+end)
+
+QuickSection:AddButton("Show Loading", function()
+    HubWindow:ShowLoading("Testing on " .. Device.Type, 1.5)
+end)
+
+-- ========== TAB 2: PLAYER ==========
 local PlayerTab = HubWindow:AddTab("Player", "👤")
 
-local Movement = PlayerTab:AddSection("Movement")
-Movement:AddSlider("Walk Speed", 16, 250, 16, function(v)
+local MoveSection = PlayerTab:AddSection("Movement")
+
+local speedSlider = MoveSection:AddSlider("Walk Speed", 16, 250, 16, function(v)
     local hrp = LP.Character and LP.Character:FindFirstChild("Humanoid")
     if hrp then hrp.WalkSpeed = v end
 end)
 
-Movement:AddSlider("Jump Power", 50, 250, 50, function(v)
+local jumpSlider = MoveSection:AddSlider("Jump Power", 50, 250, 50, function(v)
     local hrp = LP.Character and LP.Character:FindFirstChild("Humanoid")
     if hrp then hrp.JumpPower = v end
 end)
 
-Movement:AddButton("Super Jump (100)", function()
-    local hrp = LP.Character and LP.Character:FindFirstChild("Humanoid")
-    if hrp then hrp.JumpPower = 100 end
+MoveSection:AddButton("Reset Speed", function()
+    speedSlider.setValue(16)
+    HubWindow:Notify("Reset", "Walk speed reset to 16", "info", 1)
 end)
 
-Movement:AddButton("Reset Jump (50)", function()
-    local hrp = LP.Character and LP.Character:FindFirstChild("Humanoid")
-    if hrp then hrp.JumpPower = 50 end
-end)
-
-local Visuals = PlayerTab:AddSection("Visuals")
+local VisualSection = PlayerTab:AddSection("Visuals")
 
 local noclipState = false
-local noclipToggle = Visuals:AddToggle("Noclip", false, function(s)
+local noclipToggle = VisualSection:AddToggle("Noclip", false, function(s)
     noclipState = s
+    HubWindow:Notify("Noclip", s and "Enabled" or "Disabled", s and "warning" or "info", 1)
+end)
+
+local fullbrightState = false
+VisualSection:AddToggle("Fullbright", false, function(s)
+    fullbrightState = s
+    if s then
+        LS.Brightness = 2
+        LS.GlobalShadows = false
+        LS.ClockTime = 12
+    else
+        LS.Brightness = 0.5
+        LS.GlobalShadows = true
+    end
+    HubWindow:Notify("Fullbright", s and "Enabled" or "Disabled", s and "success" or "info", 1)
 end)
 
 -- Noclip loop
@@ -615,95 +1017,96 @@ task.spawn(function()
     end
 end)
 
-local fullbrightState = false
-Visuals:AddToggle("Fullbright", false, function(s)
-    fullbrightState = s
-    if s then
-        LS.Brightness = 2
-        LS.GlobalShadows = false
-        LS.ClockTime = 12
-    else
-        LS.Brightness = 0.5
-        LS.GlobalShadows = true
-    end
-end)
+-- ========== TAB 3: SCRIPTS ==========
+local ScriptsTab = HubWindow:AddTab("Scripts", "📜")
 
--- ========== TAB 2: COMBAT ==========
-local CombatTab = HubWindow:AddTab("Combat", "⚔️")
-
-local Scripts = CombatTab:AddSection("Scripts")
-Scripts:AddButton("Infinite Yield", function()
+local AdminSection = ScriptsTab:AddSection("Admin Scripts")
+AdminSection:AddButton("Infinite Yield", function()
     loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+    HubWindow:Notify("Loaded", "Infinite Yield Ready!", "success", 2)
 end)
 
-Scripts:AddButton("Cmd-X", function()
+AdminSection:AddButton("Cmd-X", function()
     loadstring(game:HttpGet('https://raw.githubusercontent.com/CMD-X/CMD-X/master/Source', true))()
+    HubWindow:Notify("Loaded", "Cmd-X Ready!", "success", 2)
 end)
 
-Scripts:AddButton("Dex Explorer", function()
+AdminSection:AddButton("Dex Explorer", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/DexV2.lua"))()
+    HubWindow:Notify("Loaded", "Dex Explorer Ready!", "success", 2)
 end)
 
-local Combat = CombatTab:AddSection("Combat")
-Combat:AddButton("Kill All (Visual)", function()
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LP and p.Character and p.Character:FindFirstChild("Humanoid") then
-            p.Character.Humanoid.Health = 0
-        end
-    end
-end)
-
--- ========== TAB 3: UTILITY ==========
+-- ========== TAB 4: UTILITY ==========
 local UtilityTab = HubWindow:AddTab("Utility", "🔧")
 
-local Teleport = UtilityTab:AddSection("Teleport")
-Teleport:AddButton("Rejoin Game", function()
+local ServerSection = UtilityTab:AddSection("Server")
+ServerSection:AddButton("Rejoin Game", function()
+    HubWindow:ShowLoading("Rejoining...", 1)
+    task.wait(1)
     TPS:Teleport(game.PlaceId, LP)
 end)
 
-Teleport:AddButton("Server Hop", function()
+ServerSection:AddButton("Server Hop", function()
+    HubWindow:ShowLoading("Finding new server...", 1)
+    task.wait(1)
     TPS:Teleport(game.PlaceId)
 end)
 
-local Misc = UtilityTab:AddSection("Misc")
-Misc:AddButton("Heal Full", function()
-    local hrp = LP.Character and LP.Character:FindFirstChild("Humanoid")
-    if hrp then hrp.Health = hrp.MaxHealth end
-end)
-
-Misc:AddButton("Copy Game ID", function()
+ServerSection:AddButton("Copy Game ID", function()
     if setclipboard then
         setclipboard(game.PlaceId)
-        HubWindow:Notify("Copied", "Game ID copied!", "success", 1.5)
+        HubWindow:Notify("Copied", "Game ID: " .. game.PlaceId, "success", 1.5)
     end
 end)
 
--- ========== TAB 4: SETTINGS ==========
+local PlayerSection = UtilityTab:AddSection("Player")
+PlayerSection:AddButton("Heal Full", function()
+    local hrp = LP.Character and LP.Character:FindFirstChild("Humanoid")
+    if hrp then hrp.Health = hrp.MaxHealth end
+    HubWindow:Notify("Healed", "Health restored!", "success", 1)
+end)
+
+PlayerSection:AddButton("Reset Character", function()
+    LP.Character:BreakJoints()
+    HubWindow:Notify("Reset", "Character reset!", "warning", 1)
+end)
+
+-- ========== TAB 5: SETTINGS ==========
 local SettingsTab = HubWindow:AddTab("Settings", "⚙️")
 
-local Display = SettingsTab:AddSection("Display")
-Display:AddButton("Small Mode (350x500)", function()
-    HubWindow.main.Size = UDim2.new(0, 350, 0, 500)
-    HubWindow.main.Position = UDim2.new(0.5, -175, 0.5, -250)
+local SizeSection = SettingsTab:AddSection("Window Size")
+
+SizeSection:AddButton("Small (Mobile Optimized)", function()
+    HubWindow.main.Size = UDim2.new(0, 350, 0, 550)
+    HubWindow.main.Position = UDim2.new(0.5, -175, 0.5, -275)
+    HubWindow:Notify("Size", "Small mode activated", "info", 1)
 end)
 
-Display:AddButton("Default Mode (400x600)", function()
-    HubWindow.main.Size = UDim2.new(0, 400, 0, 600)
-    HubWindow.main.Position = UDim2.new(0.5, -200, 0.5, -300)
+SizeSection:AddButton("Default (Auto-Scale)", function()
+    HubWindow.main.Size = UDim2.new(0, autoWidth, 0, autoHeight)
+    HubWindow.main.Position = UDim2.new(0.5, -autoWidth/2, 0.5, -autoHeight/2)
+    HubWindow:Notify("Size", "Default size restored", "info", 1)
 end)
 
-Display:AddButton("Large Mode (500x700)", function()
+SizeSection:AddButton("Large (Desktop)", function()
     HubWindow.main.Size = UDim2.new(0, 500, 0, 700)
     HubWindow.main.Position = UDim2.new(0.5, -250, 0.5, -350)
+    HubWindow:Notify("Size", "Large mode activated", "info", 1)
 end)
 
-local Info = SettingsTab:AddSection("Info")
-Info:AddLabel("Username: " .. LP.Name)
-Info:AddLabel("Display: " .. (LP.DisplayName or LP.Name))
-Info:AddLabel("User ID: " .. LP.UserId)
-Info:AddLabel("Game: " .. game.Name)
+local InfoSection2 = SettingsTab:AddSection("Information")
+InfoSection2:AddLabel("Framework: FUBNIK v6.0")
+InfoSection2:AddLabel("Device: " .. Device.Type)
+InfoSection2:AddLabel("Screen: " .. Device.ScreenWidth .. "x" .. Device.ScreenHeight)
+InfoSection2:AddLabel("Username: " .. LP.Name)
+InfoSection2:AddLabel("Game: " .. game.Name)
 
 -- Welcome notification
-HubWindow:Notify("Welcome!", "Script Hub Pro Loaded Successfully!", "success", 3)
+HubWindow:Notify("FUBNIK Ready!", "Auto-scaled for " .. Device.Type, "success", 4)
 
-print("Script Hub Pro Loaded!")
+print("========================================")
+print("FUBNIK v6.0 - Fully Loaded!")
+print("Device: " .. Device.Type)
+print("Window Size: " .. autoWidth .. "x" .. autoHeight)
+print("All features work perfectly on your device!")
+print("========================================")
