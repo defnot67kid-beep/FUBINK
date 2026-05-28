@@ -1,849 +1,1053 @@
 --[[
-    ╔════════════════════════════════════════════════════════════════════════════╗
-    ║                                                                            ║
-    ║   ███████╗██╗   ██╗██████╗ ███╗   ██╗██╗██╗  ██╗                           ║
-    ║   ██╔════╝██║   ██║██╔══██╗████╗  ██║██║╚██╗██╔╝                           ║
-    ║   █████╗  ██║   ██║██████╔╝██╔██╗ ██║██║ ╚███╔╝                            ║
-    ║   ██╔══╝  ██║   ██║██╔══██╗██║╚██╗██║██║ ██╔██╗                            ║
-    ║   ██║     ╚██████╔╝██████╔╝██║ ╚████║██║██╔╝ ██╗                           ║
-    ║   ╚═╝      ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝                           ║
-    ║                                                                            ║
-    ║                   FUBNIK - COMPLETE CUSTOM UI                              ║
-    ║              Name ANYTHING | Position ANYTHING                             ║
-    ║                    NO RESTRICTIONS WHATSOEVER                              ║
-    ╚════════════════════════════════════════════════════════════════════════════╝
+    ╔═══════════════════════════════════════════════════════════════════════════════╗
+    ║                                                                               ║
+    ║   ███████╗██╗   ██╗██████╗ ███╗   ██╗██╗██╗  ██╗    ██╗   ██╗██████╗         ║
+    ║   ██╔════╝██║   ██║██╔══██╗████╗  ██║██║╚██╗██╔╝    ██║   ██║╚════██╗        ║
+    ║   █████╗  ██║   ██║██████╔╝██╔██╗ ██║██║ ╚███╔╝     ██║   ██║ █████╔╝        ║
+    ║   ██╔══╝  ██║   ██║██╔══██╗██║╚██╗██║██║ ██╔██╗     ╚██╗ ██╔╝██╔═══╝         ║
+    ║   ██║     ╚██████╔╝██████╔╝██║ ╚████║██║██╔╝ ██╗     ╚████╔╝ ███████╗        ║
+    ║   ╚═╝      ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝      ╚═══╝  ╚══════╝        ║
+    ║                                                                               ║
+    ║                    FUBNIK FRAMEWORK v3.0                                       ║
+    ║              Fully Customizable UI System                                      ║
+    ║         Gamepass Integration | Color System | No Limits                        ║
+    ╚═══════════════════════════════════════════════════════════════════════════════╝
 --]]
 
--- ============================================================================
--- SERVICES
--- ============================================================================
-local Players = game:GetService("Players")
-local LP = Players.LocalPlayer
-local UIS = game:GetService("UserInputService")
-local TS = game:GetService("TweenService")
-local CG = game:GetService("CoreGui")
-local MPS = game:GetService("MarketplaceService")
+-- ================================================================================
+-- COLOR SYSTEM - Full artistic control
+-- ================================================================================
 
--- ============================================================================
--- COMPLETE COLOR LIBRARY - 200+ COLORS
--- ============================================================================
-local Colors = {
-    -- REDS
-    ["red"] = Color3.fromRGB(255, 0, 0),
-    ["crimson"] = Color3.fromRGB(220, 20, 60),
-    ["scarlet"] = Color3.fromRGB(255, 36, 0),
-    ["ruby"] = Color3.fromRGB(224, 17, 95),
-    ["cherry"] = Color3.fromRGB(222, 49, 99),
-    ["brick"] = Color3.fromRGB(203, 65, 84),
-    ["blood"] = Color3.fromRGB(138, 3, 3),
-    ["dark red"] = Color3.fromRGB(139, 0, 0),
-    ["maroon"] = Color3.fromRGB(128, 0, 0),
-    ["rose"] = Color3.fromRGB(255, 0, 127),
-    ["coral"] = Color3.fromRGB(255, 127, 80),
-    ["salmon"] = Color3.fromRGB(250, 128, 114),
-    ["tomato"] = Color3.fromRGB(255, 99, 71),
-    ["rust"] = Color3.fromRGB(183, 65, 14),
-    ["burgundy"] = Color3.fromRGB(128, 0, 32),
-    ["wine"] = Color3.fromRGB(114, 47, 55),
-    ["candy"] = Color3.fromRGB(255, 75, 75),
-    ["apple"] = Color3.fromRGB(165, 42, 42),
-    ["chili"] = Color3.fromRGB(199, 58, 37),
-    ["amber red"] = Color3.fromRGB(204, 49, 38),
+local ColorSystem = {
+    -- Predefined colors with shades
+    colors = {
+        red = {
+            bright = Color3.fromRGB(255, 80, 80),
+            dark = Color3.fromRGB(139, 0, 0),
+            crimson = Color3.fromRGB(220, 20, 60),
+            blood = Color3.fromRGB(102, 0, 0),
+            rose = Color3.fromRGB(255, 102, 102),
+            maroon = Color3.fromRGB(128, 0, 0),
+            brick = Color3.fromRGB(156, 62, 62),
+            rust = Color3.fromRGB(183, 65, 14),
+            candy = Color3.fromRGB(255, 50, 50),
+            cherry = Color3.fromRGB(222, 49, 99),
+        },
+        blue = {
+            bright = Color3.fromRGB(80, 80, 255),
+            dark = Color3.fromRGB(0, 0, 139),
+            ocean = Color3.fromRGB(0, 119, 190),
+            sky = Color3.fromRGB(135, 206, 235),
+            navy = Color3.fromRGB(0, 0, 128),
+            cyan = Color3.fromRGB(0, 255, 255),
+            royal = Color3.fromRGB(65, 105, 225),
+            steel = Color3.fromRGB(70, 130, 180),
+            ice = Color3.fromRGB(173, 216, 230),
+            deep = Color3.fromRGB(0, 50, 100),
+        },
+        green = {
+            bright = Color3.fromRGB(80, 255, 80),
+            dark = Color3.fromRGB(0, 100, 0),
+            lime = Color3.fromRGB(50, 205, 50),
+            forest = Color3.fromRGB(34, 139, 34),
+            emerald = Color3.fromRGB(80, 200, 120),
+            mint = Color3.fromRGB(152, 255, 152),
+            olive = Color3.fromRGB(128, 128, 0),
+            neon = Color3.fromRGB(57, 255, 20),
+            sea = Color3.fromRGB(46, 139, 87),
+            sage = Color3.fromRGB(156, 184, 108),
+        },
+        purple = {
+            bright = Color3.fromRGB(200, 80, 255),
+            dark = Color3.fromRGB(75, 0, 130),
+            lavender = Color3.fromRGB(230, 200, 255),
+            violet = Color3.fromRGB(138, 43, 226),
+            plum = Color3.fromRGB(221, 160, 221),
+            orchid = Color3.fromRGB(218, 112, 214),
+            indigo = Color3.fromRGB(75, 0, 130),
+            magenta = Color3.fromRGB(255, 0, 255),
+            grape = Color3.fromRGB(111, 45, 168),
+            royalPurple = Color3.fromRGB(120, 81, 169),
+        },
+        orange = {
+            bright = Color3.fromRGB(255, 165, 80),
+            dark = Color3.fromRGB(204, 85, 0),
+            tangerine = Color3.fromRGB(255, 140, 0),
+            pumpkin = Color3.fromRGB(255, 117, 24),
+            coral = Color3.fromRGB(255, 127, 80),
+            peach = Color3.fromRGB(255, 200, 150),
+            amber = Color3.fromRGB(255, 191, 0),
+            gold = Color3.fromRGB(255, 215, 0),
+            sunset = Color3.fromRGB(253, 94, 83),
+            fire = Color3.fromRGB(255, 69, 0),
+        },
+        yellow = {
+            bright = Color3.fromRGB(255, 255, 80),
+            dark = Color3.fromRGB(204, 204, 0),
+            lemon = Color3.fromRGB(255, 255, 150),
+            banana = Color3.fromRGB(255, 240, 140),
+            honey = Color3.fromRGB(255, 215, 100),
+            mustard = Color3.fromRGB(255, 219, 88),
+            sunflower = Color3.fromRGB(255, 218, 52),
+            cream = Color3.fromRGB(255, 253, 208),
+            butter = Color3.fromRGB(255, 247, 153),
+            canary = Color3.fromRGB(255, 255, 102),
+        },
+        pink = {
+            bright = Color3.fromRGB(255, 105, 180),
+            dark = Color3.fromRGB(231, 84, 128),
+            hot = Color3.fromRGB(255, 105, 180),
+            baby = Color3.fromRGB(255, 182, 193),
+            bubblegum = Color3.fromRGB(255, 192, 203),
+            rose = Color3.fromRGB(255, 102, 204),
+            salmon = Color3.fromRGB(250, 128, 114),
+            flamingo = Color3.fromRGB(252, 142, 172),
+            blush = Color3.fromRGB(255, 140, 160),
+            cotton = Color3.fromRGB(255, 200, 210),
+        },
+        gray = {
+            bright = Color3.fromRGB(200, 200, 200),
+            dark = Color3.fromRGB(64, 64, 64),
+            silver = Color3.fromRGB(192, 192, 192),
+            charcoal = Color3.fromRGB(54, 69, 79),
+            slate = Color3.fromRGB(112, 128, 144),
+            ash = Color3.fromRGB(169, 169, 169),
+            smoke = Color3.fromRGB(128, 128, 128),
+            dim = Color3.fromRGB(105, 105, 105),
+            light = Color3.fromRGB(211, 211, 211),
+            gunmetal = Color3.fromRGB(44, 53, 57),
+        },
+        white = {
+            pure = Color3.fromRGB(255, 255, 255),
+            snow = Color3.fromRGB(255, 250, 250),
+            ivory = Color3.fromRGB(255, 255, 240),
+            pearl = Color3.fromRGB(248, 248, 255),
+            off = Color3.fromRGB(250, 250, 250),
+            ghost = Color3.fromRGB(248, 248, 255),
+            floral = Color3.fromRGB(255, 250, 240),
+            linen = Color3.fromRGB(250, 240, 230),
+            antique = Color3.fromRGB(250, 235, 215),
+            beige = Color3.fromRGB(245, 245, 220),
+        },
+        black = {
+            pure = Color3.fromRGB(0, 0, 0),
+            jet = Color3.fromRGB(20, 20, 20),
+            obsidian = Color3.fromRGB(10, 10, 10),
+            onyx = Color3.fromRGB(35, 35, 35),
+            midnight = Color3.fromRGB(25, 25, 45),
+            carbon = Color3.fromRGB(30, 30, 30),
+            charcoal = Color3.fromRGB(40, 40, 40),
+            shadow = Color3.fromRGB(15, 15, 15),
+            ink = Color3.fromRGB(8, 8, 12),
+            void = Color3.fromRGB(5, 5, 5),
+        }
+    },
     
-    -- ORANGES
-    ["orange"] = Color3.fromRGB(255, 165, 0),
-    ["dark orange"] = Color3.fromRGB(255, 140, 0),
-    ["tangerine"] = Color3.fromRGB(242, 133, 0),
-    ["pumpkin"] = Color3.fromRGB(255, 117, 24),
-    ["amber"] = Color3.fromRGB(255, 191, 0),
-    ["gold"] = Color3.fromRGB(255, 215, 0),
-    ["peach"] = Color3.fromRGB(255, 218, 185),
-    ["apricot"] = Color3.fromRGB(251, 206, 177),
-    ["mango"] = Color3.fromRGB(255, 130, 67),
-    ["coral orange"] = Color3.fromRGB(255, 114, 86),
-    ["burnt orange"] = Color3.fromRGB(204, 85, 0),
-    ["carrot"] = Color3.fromRGB(237, 145, 33),
-    ["sunset"] = Color3.fromRGB(253, 94, 83),
-    ["peach orange"] = Color3.fromRGB(255, 204, 153),
+    -- Convert hex to Color3
+    hexToRGB = function(hex)
+        hex = hex:gsub("#", "")
+        local r = tonumber(hex:sub(1,2), 16) or 0
+        local g = tonumber(hex:sub(3,4), 16) or 0
+        local b = tonumber(hex:sub(5,6), 16) or 0
+        return Color3.fromRGB(r, g, b)
+    end,
     
-    -- YELLOWS
-    ["yellow"] = Color3.fromRGB(255, 255, 0),
-    ["lemon"] = Color3.fromRGB(247, 255, 0),
-    ["canary"] = Color3.fromRGB(255, 255, 153),
-    ["golden"] = Color3.fromRGB(255, 223, 0),
-    ["mustard"] = Color3.fromRGB(255, 219, 88),
-    ["honey"] = Color3.fromRGB(254, 194, 12),
-    ["butter"] = Color3.fromRGB(255, 236, 139),
-    ["cream"] = Color3.fromRGB(255, 253, 208),
-    ["banana"] = Color3.fromRGB(255, 225, 53),
-    ["flax"] = Color3.fromRGB(238, 220, 130),
-    ["saffron"] = Color3.fromRGB(244, 196, 48),
-    ["dandelion"] = Color3.fromRGB(240, 225, 48),
-    ["sunflower"] = Color3.fromRGB(218, 165, 32),
-    
-    -- GREENS
-    ["green"] = Color3.fromRGB(0, 255, 0),
-    ["lime"] = Color3.fromRGB(50, 205, 50),
-    ["forest"] = Color3.fromRGB(34, 139, 34),
-    ["dark green"] = Color3.fromRGB(0, 100, 0),
-    ["emerald"] = Color3.fromRGB(80, 200, 120),
-    ["mint"] = Color3.fromRGB(152, 255, 152),
-    ["sage"] = Color3.fromRGB(188, 196, 136),
-    ["olive"] = Color3.fromRGB(128, 128, 0),
-    ["chartreuse"] = Color3.fromRGB(127, 255, 0),
-    ["seaweed"] = Color3.fromRGB(45, 118, 69),
-    ["pine"] = Color3.fromRGB(1, 68, 33),
-    ["jade"] = Color3.fromRGB(0, 168, 107),
-    ["moss"] = Color3.fromRGB(138, 154, 91),
-    ["spring"] = Color3.fromRGB(0, 255, 127),
-    ["tea"] = Color3.fromRGB(208, 240, 192),
-    ["viridian"] = Color3.fromRGB(64, 130, 109),
-    ["apple green"] = Color3.fromRGB(141, 182, 0),
-    ["fern"] = Color3.fromRGB(79, 121, 66),
-    ["hunter"] = Color3.fromRGB(53, 94, 59),
-    ["kelp"] = Color3.fromRGB(73, 101, 60),
-    
-    -- BLUES
-    ["blue"] = Color3.fromRGB(0, 0, 255),
-    ["dark blue"] = Color3.fromRGB(0, 0, 139),
-    ["navy"] = Color3.fromRGB(0, 0, 128),
-    ["cobalt"] = Color3.fromRGB(0, 71, 171),
-    ["royal"] = Color3.fromRGB(65, 105, 225),
-    ["ocean"] = Color3.fromRGB(0, 119, 190),
-    ["sky"] = Color3.fromRGB(135, 206, 235),
-    ["azure"] = Color3.fromRGB(0, 127, 255),
-    ["cerulean"] = Color3.fromRGB(0, 123, 167),
-    ["baby blue"] = Color3.fromRGB(137, 207, 240),
-    ["powder"] = Color3.fromRGB(176, 224, 230),
-    ["steel"] = Color3.fromRGB(70, 130, 180),
-    ["cyan"] = Color3.fromRGB(0, 255, 255),
-    ["teal"] = Color3.fromRGB(0, 128, 128),
-    ["aqua"] = Color3.fromRGB(0, 255, 200),
-    ["turquoise"] = Color3.fromRGB(64, 224, 208),
-    ["midnight"] = Color3.fromRGB(25, 25, 112),
-    ["denim"] = Color3.fromRGB(21, 96, 189),
-    ["sapphire"] = Color3.fromRGB(15, 82, 186),
-    ["indigo blue"] = Color3.fromRGB(8, 86, 198),
-    
-    -- PURPLES
-    ["purple"] = Color3.fromRGB(128, 0, 128),
-    ["violet"] = Color3.fromRGB(138, 43, 226),
-    ["lavender"] = Color3.fromRGB(230, 230, 250),
-    ["lilac"] = Color3.fromRGB(200, 162, 200),
-    ["magenta"] = Color3.fromRGB(255, 0, 255),
-    ["orchid"] = Color3.fromRGB(218, 112, 214),
-    ["plum"] = Color3.fromRGB(221, 160, 221),
-    ["indigo"] = Color3.fromRGB(75, 0, 130),
-    ["amethyst"] = Color3.fromRGB(153, 102, 204),
-    ["grape"] = Color3.fromRGB(111, 45, 168),
-    ["eggplant"] = Color3.fromRGB(72, 23, 70),
-    ["periwinkle"] = Color3.fromRGB(204, 204, 255),
-    ["fuchsia"] = Color3.fromRGB(255, 119, 255),
-    ["mauve"] = Color3.fromRGB(224, 176, 255),
-    ["wisteria"] = Color3.fromRGB(201, 160, 220),
-    
-    -- PINKS
-    ["pink"] = Color3.fromRGB(255, 192, 203),
-    ["hot pink"] = Color3.fromRGB(255, 105, 180),
-    ["neon pink"] = Color3.fromRGB(255, 20, 147),
-    ["bubblegum"] = Color3.fromRGB(255, 121, 167),
-    ["pastel pink"] = Color3.fromRGB(255, 209, 220),
-    ["rose pink"] = Color3.fromRGB(255, 102, 204),
-    ["carnation"] = Color3.fromRGB(255, 166, 201),
-    ["salmon pink"] = Color3.fromRGB(255, 145, 164),
-    ["blush"] = Color3.fromRGB(222, 93, 131),
-    ["cotton candy"] = Color3.fromRGB(255, 188, 217),
-    ["watermelon"] = Color3.fromRGB(252, 108, 133),
-    ["flamingo"] = Color3.fromRGB(252, 142, 172),
-    
-    -- BROWNS
-    ["brown"] = Color3.fromRGB(139, 69, 19),
-    ["tan"] = Color3.fromRGB(210, 180, 140),
-    ["beige"] = Color3.fromRGB(245, 245, 220),
-    ["coffee"] = Color3.fromRGB(111, 78, 55),
-    ["chocolate"] = Color3.fromRGB(123, 63, 0),
-    ["chestnut"] = Color3.fromRGB(149, 69, 53),
-    ["cocoa"] = Color3.fromRGB(105, 60, 35),
-    ["saddle"] = Color3.fromRGB(139, 69, 19),
-    ["wheat"] = Color3.fromRGB(245, 222, 179),
-    ["khaki"] = Color3.fromRGB(195, 176, 145),
-    ["mahogany"] = Color3.fromRGB(192, 64, 0),
-    ["bronze"] = Color3.fromRGB(205, 127, 50),
-    
-    -- NEONS
-    ["neon"] = Color3.fromRGB(0, 255, 200),
-    ["neon red"] = Color3.fromRGB(255, 0, 80),
-    ["neon green"] = Color3.fromRGB(57, 255, 20),
-    ["neon blue"] = Color3.fromRGB(0, 100, 255),
-    ["neon yellow"] = Color3.fromRGB(255, 255, 0),
-    ["neon orange"] = Color3.fromRGB(255, 128, 0),
-    ["neon purple"] = Color3.fromRGB(180, 0, 255),
-    ["neon pink"] = Color3.fromRGB(255, 0, 150),
-    
-    -- PASTELS
-    ["pastel red"] = Color3.fromRGB(255, 179, 179),
-    ["pastel orange"] = Color3.fromRGB(255, 204, 153),
-    ["pastel yellow"] = Color3.fromRGB(255, 242, 179),
-    ["pastel green"] = Color3.fromRGB(179, 255, 179),
-    ["pastel blue"] = Color3.fromRGB(179, 204, 255),
-    ["pastel purple"] = Color3.fromRGB(204, 179, 255),
-    ["pastel pink"] = Color3.fromRGB(255, 179, 204),
-    
-    -- GRAYS
-    ["white"] = Color3.fromRGB(255, 255, 255),
-    ["light gray"] = Color3.fromRGB(211, 211, 211),
-    ["gray"] = Color3.fromRGB(128, 128, 128),
-    ["dark gray"] = Color3.fromRGB(64, 64, 64),
-    ["charcoal"] = Color3.fromRGB(54, 54, 54),
-    ["silver"] = Color3.fromRGB(192, 192, 192),
-    ["black"] = Color3.fromRGB(15, 15, 25),
-    ["dark"] = Color3.fromRGB(18, 18, 28),
-    ["midnight dark"] = Color3.fromRGB(10, 10, 20),
-    ["slate"] = Color3.fromRGB(112, 128, 144),
-    ["ash"] = Color3.fromRGB(178, 190, 181),
+    -- Create gradient colors
+    createGradient = function(color1, color2, steps)
+        local gradient = {}
+        local r1, g1, b1 = color1.R * 255, color1.G * 255, color1.B * 255
+        local r2, g2, b2 = color2.R * 255, color2.G * 255, color2.B * 255
+        
+        for i = 0, steps do
+            local t = i / steps
+            local r = r1 + (r2 - r1) * t
+            local g = g1 + (g2 - g1) * t
+            local b = b1 + (b2 - b1) * t
+            table.insert(gradient, Color3.fromRGB(r, g, b))
+        end
+        return gradient
+    end
 }
 
--- Parse color
-local function ParseColor(input)
-    if type(input) == "table" and input.R then return input end
-    input = string.lower(tostring(input))
-    if input:match("^#?%x%x%x%x%x%x$") then
-        local hex = input:gsub("#", "")
-        return Color3.fromRGB(tonumber(hex:sub(1,2), 16) or 0, tonumber(hex:sub(3,4), 16) or 0, tonumber(hex:sub(5,6), 16) or 0)
+-- ================================================================================
+-- GAMEPASS SYSTEM
+-- ================================================================================
+
+local GamepassSystem = {}
+GamepassSystem.callbacks = {}
+GamepassSystem.ownedPasses = {}
+
+-- Check if user owns a gamepass
+function GamepassSystem:Owns(passId)
+    local success, result = pcall(function()
+        return game:GetService("MarketplaceService"):UserOwnsGamePassAsync(
+            game.Players.LocalPlayer.UserId,
+            passId
+        )
+    end)
+    if success then
+        self.ownedPasses[passId] = result
+        return result
     end
-    return Colors[input] or Color3.fromRGB(100, 100, 255)
+    return false
 end
 
--- ============================================================================
--- COMPLETE FLEXIBLE UI SYSTEM
--- ============================================================================
-
--- Get optimal sizing based on device
-local function GetSizing()
-    local screen = workspace.CurrentCamera.ViewportSize
-    local isMobile = UIS.TouchEnabled
-    return {
-        WindowWidth = isMobile and math.min(380, screen.X - 30) or math.min(480, screen.X * 0.38),
-        WindowHeight = isMobile and math.min(620, screen.Y - 100) or math.min(680, screen.Y - 120),
-        SidebarWidth = isMobile and 130 or 150,
-        ButtonHeight = isMobile and 44 or 42,
-        FontSize = isMobile and 14 or 13,
-        TitleHeight = 50,
-        Padding = 12
-    }
+-- Add callback for when pass is purchased or already owned
+function GamepassSystem:OnPurchase(passId, callback, runIfOwned)
+    if not self.callbacks[passId] then
+        self.callbacks[passId] = {}
+    end
+    table.insert(self.callbacks[passId], callback)
+    
+    if runIfOwned and self:Owns(passId) then
+        callback("already_owned")
+    end
 end
 
--- Utils
-local function Round(frame, r) local c = Instance.new("UICorner") c.CornerRadius = UDim.new(0, r or 8) c.Parent = frame end
-local function Stroke(frame, t, c) local s = Instance.new("UIStroke") s.Thickness = t or 1 s.Color = c or Color3.fromRGB(80, 80, 120) s.Parent = frame end
-local function Tween(obj, props, time) return TS:Create(obj, TweenInfo.new(time or 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), props):Play() end
-
--- Notification system
-local NotifyContainer = nil
-local function Notify(title, msg, type, dur, actionText, actionCallback)
-    if not NotifyContainer then
-        NotifyContainer = Instance.new("Frame")
-        NotifyContainer.Name = "FubnikNotifs"
-        NotifyContainer.Size = UDim2.new(0, 340, 1, -20)
-        NotifyContainer.Position = UDim2.new(1, -360, 0, 10)
-        NotifyContainer.BackgroundTransparency = 1
-        NotifyContainer.Parent = CG
-    end
+-- Process prompt purchase
+function GamepassSystem:PromptPurchase(passId)
+    game:GetService("MarketplaceService"):PromptGamePassPurchase(
+        game.Players.LocalPlayer,
+        passId
+    )
     
-    type = type or "info"
-    dur = dur or 3
-    local typeColors = {info = Color3.fromRGB(80, 180, 255), success = Color3.fromRGB(80, 255, 120), warning = Color3.fromRGB(255, 200, 80), error = Color3.fromRGB(255, 80, 100)}
-    local icons = {info = "ℹ️", success = "✅", warning = "⚠️", error = "❌"}
-    
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, -10, 0, 0)
-    frame.Position = UDim2.new(0, 5, 1, -10)
-    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
-    frame.AutomaticSize = Enum.AutomaticSize.Y
-    frame.ClipsDescendants = true
-    Round(frame, 12)
-    Stroke(frame, 1, typeColors[type])
-    frame.Parent = NotifyContainer
-    
-    local iconL = Instance.new("TextLabel")
-    iconL.Size = UDim2.new(0, 30, 0, 30)
-    iconL.Position = UDim2.new(0, 12, 0, 12)
-    iconL.Text = icons[type]
-    iconL.TextSize = 18
-    iconL.BackgroundTransparency = 1
-    iconL.Parent = frame
-    
-    local titleL = Instance.new("TextLabel")
-    titleL.Size = UDim2.new(1, -55, 0, 25)
-    titleL.Position = UDim2.new(0, 48, 0, 8)
-    titleL.Text = title
-    titleL.TextColor3 = Color3.fromRGB(255, 255, 255)
-    titleL.TextSize = 14
-    titleL.Font = Enum.Font.GothamBold
-    titleL.TextXAlignment = Enum.TextXAlignment.Left
-    titleL.BackgroundTransparency = 1
-    titleL.Parent = frame
-    
-    local msgL = Instance.new("TextLabel")
-    msgL.Size = UDim2.new(1, -55, 0, 0)
-    msgL.Position = UDim2.new(0, 48, 0, 33)
-    msgL.Text = msg
-    msgL.TextColor3 = Color3.fromRGB(180, 180, 210)
-    msgL.TextSize = 12
-    msgL.Font = Enum.Font.Gotham
-    msgL.TextWrapped = true
-    msgL.BackgroundTransparency = 1
-    msgL.AutomaticSize = Enum.AutomaticSize.Y
-    msgL.Parent = frame
-    
-    if actionText and actionCallback then
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(0, 80, 0, 28)
-        btn.Position = UDim2.new(1, -90, 1, -38)
-        btn.Text = actionText
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        btn.TextSize = 11
-        btn.Font = Enum.Font.GothamSemibold
-        btn.BackgroundColor3 = typeColors[type]
-        Round(btn, 6)
-        btn.Parent = frame
-        btn.MouseButton1Click:Connect(function() actionCallback() frame:Destroy() end)
-    end
-    
-    local progress = Instance.new("Frame")
-    progress.Size = UDim2.new(1, 0, 0, 3)
-    progress.Position = UDim2.new(0, 0, 1, -3)
-    progress.BackgroundColor3 = typeColors[type]
-    progress.BackgroundTransparency = 0.3
-    progress.Parent = frame
-    
-    local finalH = msgL.AbsoluteSize.Y + 55 + (actionText and 40 or 0)
-    frame.Size = UDim2.new(1, -10, 0, finalH)
-    frame.Position = UDim2.new(0, 5, 1, 0)
-    Tween(frame, {Position = UDim2.new(0, 5, 1, -finalH - 10)}, 0.3)
-    TS:Create(progress, TweenInfo.new(dur, Enum.EasingStyle.Linear), {Size = UDim2.new(0, 0, 0, 3)}):Play()
-    
-    task.spawn(function() task.wait(dur) if frame and frame.Parent then Tween(frame, {Position = UDim2.new(0, 5, 1, 0), BackgroundTransparency = 1}, 0.2) task.wait(0.2) frame:Destroy() end end)
-    return frame
-end
-
--- ============================================================================
--- MAIN WINDOW CREATOR - COMPLETE CUSTOMIZATION
--- ============================================================================
-local function CreateWindow(options)
-    options = options or {}
-    local sizing = GetSizing()
-    
-    local width = options.Width or sizing.WindowWidth
-    local height = options.Height or sizing.WindowHeight
-    local title = options.Title or "Fubnik UI"
-    local accentColor = ParseColor(options.AccentColor or "neon blue")
-    local bgColor = ParseColor(options.BackgroundColor or "dark")
-    local sidebarColor = ParseColor(options.SidebarColor or "midnight dark")
-    
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "Fubnik_" .. tostring(os.time())
-    screenGui.ResetOnSpawn = false
-    screenGui.Parent = CG
-    
-    local main = Instance.new("Frame")
-    main.Size = UDim2.new(0, width, 0, height)
-    main.Position = options.Position or UDim2.new(0.5, -width/2, 0.5, -height/2)
-    main.BackgroundColor3 = bgColor
-    main.BackgroundTransparency = 0.05
-    Round(main, options.CornerRadius or 14)
-    Stroke(main, 1.5, accentColor)
-    main.Parent = screenGui
-    
-    -- Title bar (customizable)
-    local titleBar = Instance.new("Frame")
-    titleBar.Size = UDim2.new(1, 0, 0, options.TitleHeight or sizing.TitleHeight)
-    titleBar.BackgroundTransparency = 1
-    titleBar.Parent = main
-    
-    local titleText = Instance.new("TextLabel")
-    titleText.Size = UDim2.new(1, -50, 1, 0)
-    titleText.Position = UDim2.new(0, 15, 0, 0)
-    titleText.Text = title
-    titleText.TextColor3 = ParseColor(options.TitleColor or "white")
-    titleText.TextSize = options.TitleFontSize or (sizing.FontSize + 2)
-    titleText.Font = Enum.Font[options.TitleFont or "GothamBold"]
-    titleText.TextXAlignment = Enum.TextXAlignment.Left
-    titleText.BackgroundTransparency = 1
-    titleText.Parent = titleBar
-    
-    -- Close button
-    local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.new(0, 35, 0, 35)
-    closeBtn.Position = UDim2.new(1, -42, 0, 8)
-    closeBtn.Text = options.CloseText or "✕"
-    closeBtn.TextColor3 = ParseColor(options.CloseColor or "red")
-    closeBtn.TextSize = 16
-    closeBtn.Font = Enum.Font.Gotham
-    closeBtn.BackgroundTransparency = 1
-    closeBtn.Parent = titleBar
-    closeBtn.MouseButton1Click:Connect(function() screenGui:Destroy() end)
-    
-    -- Sidebar (customizable)
-    local sidebar = Instance.new("Frame")
-    sidebar.Size = UDim2.new(0, options.SidebarWidth or sizing.SidebarWidth, 1, -(options.TitleHeight or sizing.TitleHeight))
-    sidebar.Position = UDim2.new(0, 0, 0, options.TitleHeight or sizing.TitleHeight)
-    sidebar.BackgroundColor3 = sidebarColor
-    sidebar.BackgroundTransparency = 0.3
-    sidebar.Parent = main
-    
-    local tabList = Instance.new("ScrollingFrame")
-    tabList.Size = UDim2.new(1, -10, 1, -10)
-    tabList.Position = UDim2.new(0, 5, 0, 5)
-    tabList.BackgroundTransparency = 1
-    tabList.BorderSizePixel = 0
-    tabList.ScrollBarThickness = 2
-    tabList.Parent = sidebar
-    
-    local tabLayout = Instance.new("UIListLayout")
-    tabLayout.Padding = UDim.new(0, 6)
-    tabLayout.Parent = tabList
-    
-    -- Content area
-    local contentArea = Instance.new("Frame")
-    contentArea.Size = UDim2.new(1, -((options.SidebarWidth or sizing.SidebarWidth) + 15), 1, -((options.TitleHeight or sizing.TitleHeight) + 10))
-    contentArea.Position = UDim2.new(0, (options.SidebarWidth or sizing.SidebarWidth) + 10, 0, (options.TitleHeight or sizing.TitleHeight) + 5)
-    contentArea.BackgroundColor3 = bgColor
-    contentArea.BackgroundTransparency = 0.2
-    Round(contentArea, 10)
-    contentArea.Parent = main
-    
-    local tabContainer = Instance.new("Frame")
-    tabContainer.Size = UDim2.new(1, -20, 1, -20)
-    tabContainer.Position = UDim2.new(0, 10, 0, 10)
-    tabContainer.BackgroundTransparency = 1
-    tabContainer.Parent = contentArea
-    
-    -- Dragging (optional)
-    if options.Draggable ~= false then
-        local dragging = false
-        local dragStart, startPos
-        titleBar.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = true
-                dragStart = input.Position
-                startPos = main.Position
-            end
-        end)
-        UIS.InputChanged:Connect(function(input)
-            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                local delta = input.Position - dragStart
-                main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-            end
-        end)
-        UIS.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
-        end)
-    end
-    
-    local window = {
-        ScreenGui = screenGui,
-        MainFrame = main,
-        Sidebar = sidebar,
-        TabList = tabList,
-        TabContainer = tabContainer,
-        Tabs = {},
-        CurrentTab = nil,
-        Options = options,
-        Sizing = sizing
-    }
-    
-    -- Add Tab method
-    function window:AddTab(tabOptions)
-        local tabName = tabOptions.Name or "Tab"
-        local tabIcon = tabOptions.Icon or ""
-        local tabColor = ParseColor(tabOptions.Color or "white")
-        
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, -10, 0, tabOptions.ButtonHeight or self.Sizing.ButtonHeight)
-        btn.Position = UDim2.new(0, 5, 0, 0)
-        btn.Text = tabIcon ~= "" and (tabIcon .. "  " .. tabName) or tabName
-        btn.TextColor3 = tabColor
-        btn.TextSize = tabOptions.FontSize or (self.Sizing.FontSize - 1)
-        btn.Font = Enum.Font[tabOptions.Font or "Gotham"]
-        btn.TextXAlignment = Enum.TextXAlignment.Left
-        btn.BackgroundTransparency = 1
-        Round(btn, 6)
-        btn.Parent = self.TabList
-        
-        local content = Instance.new("ScrollingFrame")
-        content.Size = UDim2.new(1, 0, 1, 0)
-        content.BackgroundTransparency = 1
-        content.BorderSizePixel = 0
-        content.ScrollBarThickness = 3
-        content.Visible = false
-        content.CanvasSize = UDim2.new(0, 0, 0, 0)
-        content.Parent = self.TabContainer
-        
-        local layout = Instance.new("UIListLayout")
-        layout.Padding = UDim.new(0, tabOptions.SectionSpacing or 12)
-        layout.SortOrder = Enum.SortOrder.LayoutOrder
-        layout.Parent = content
-        
-        layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            content.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 20)
-        end)
-        
-        local function select()
-            for _, child in pairs(self.TabContainer:GetChildren()) do
-                if child:IsA("ScrollingFrame") then child.Visible = false end
-            end
-            for _, child in pairs(self.TabList:GetChildren()) do
-                if child:IsA("TextButton") then
-                    Tween(child, {BackgroundColor3 = Color3.fromRGB(0, 0, 0), TextColor3 = Color3.fromRGB(180, 180, 210)}, 0.1)
-                    child.BackgroundTransparency = 1
+    -- Monitor for purchase
+    local connection
+    connection = game:GetService("MarketplaceService").ProcessReceipt:Connect(function(receiptInfo)
+        if receiptInfo.ProductId == passId and receiptInfo.PlayerId == game.Players.LocalPlayer.UserId then
+            if receiptInfo.PurchaseStatus == Enum.PurchaseStatus.Purchased then
+                self.ownedPasses[passId] = true
+                if self.callbacks[passId] then
+                    for _, callback in pairs(self.callbacks[passId]) do
+                        callback("purchased")
+                    end
                 end
             end
-            content.Visible = true
-            Tween(btn, {BackgroundColor3 = Color3.fromRGB(40, 40, 70), TextColor3 = Color3.fromRGB(255, 255, 255)}, 0.1)
-            btn.BackgroundTransparency = 0.1
+            connection:Disconnect()
+        end
+        return Enum.ProductPurchaseDecision.PurchaseGranted
+    end)
+end
+
+-- ================================================================================
+-- NOTIFICATION SYSTEM
+-- ================================================================================
+
+local NotificationSystem = {}
+NotificationSystem.activeNotifications = {}
+NotificationSystem.customButtons = {}
+
+-- Create notification holder
+local notificationHolder = Instance.new("ScreenGui")
+notificationHolder.Name = "FUBNIK_Notifications"
+notificationHolder.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+notificationHolder.Parent = game:GetService("CoreGui")
+
+local notificationList = Instance.new("Frame")
+notificationList.Name = "NotificationList"
+notificationList.Size = UDim2.new(0, 320, 1, 0)
+notificationList.Position = UDim2.new(1, -330, 0, 10)
+notificationList.BackgroundTransparency = 1
+notificationList.Parent = notificationHolder
+
+-- Add custom notification button
+function NotificationSystem:AddButton(buttonText, buttonColor, callback)
+    table.insert(self.customButtons, {
+        text = buttonText,
+        color = buttonColor,
+        callback = callback
+    })
+end
+
+-- Show notification
+function NotificationSystem:Show(title, message, duration, buttons)
+    local notification = Instance.new("Frame")
+    notification.Size = UDim2.new(1, -10, 0, 0)
+    notification.Position = UDim2.new(0, 0, 1, 5)
+    notification.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    notification.BackgroundTransparency = 0.05
+    notification.BorderSizePixel = 0
+    notification.ClipsDescendants = true
+    notification.Parent = notificationList
+    
+    -- Auto height
+    local contentHeight = 70
+    
+    -- Title
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -20, 0, 25)
+    titleLabel.Position = UDim2.new(0, 10, 0, 5)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = title
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.TextSize = 16
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.Parent = notification
+    
+    -- Message
+    local msgLabel = Instance.new("TextLabel")
+    msgLabel.Size = UDim2.new(1, -20, 0, 40)
+    msgLabel.Position = UDim2.new(0, 10, 0, 30)
+    msgLabel.BackgroundTransparency = 1
+    msgLabel.Text = message
+    msgLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+    msgLabel.TextSize = 13
+    msgLabel.TextXAlignment = Enum.TextXAlignment.Left
+    msgLabel.TextWrapped = true
+    msgLabel.Font = Enum.Font.Gotham
+    msgLabel.Parent = notification
+    
+    local buttonFrame = nil
+    local buttonCount = 0
+    
+    -- Add custom buttons if provided
+    if buttons and #buttons > 0 then
+        buttonFrame = Instance.new("Frame")
+        buttonFrame.Size = UDim2.new(1, -20, 0, 35)
+        buttonFrame.Position = UDim2.new(0, 10, 0, 75)
+        buttonFrame.BackgroundTransparency = 1
+        buttonFrame.Parent = notification
+        
+        local buttonWidth = 80
+        local spacing = 10
+        
+        for i, btn in pairs(buttons) do
+            local btnObj = Instance.new("TextButton")
+            btnObj.Size = UDim2.new(0, buttonWidth, 0, 30)
+            btnObj.Position = UDim2.new(0, (i-1) * (buttonWidth + spacing), 0, 0)
+            btnObj.Text = btn.text
+            btnObj.TextSize = 12
+            btnObj.Font = Enum.Font.GothamBold
+            btnObj.BackgroundColor3 = btn.color or Color3.fromRGB(70, 70, 80)
+            btnObj.BorderSizePixel = 0
+            btnObj.TextColor3 = Color3.fromRGB(255, 255, 255)
+            btnObj.AutoButtonColor = true
+            
+            btnObj.MouseButton1Click:Connect(function()
+                if btn.callback then btn.callback() end
+                notification:Destroy()
+            end)
+            
+            btnObj.Parent = buttonFrame
+            buttonCount = buttonCount + 1
         end
         
-        btn.MouseButton1Click:Connect(select)
+        contentHeight = 120
+    end
+    
+    notification.Size = UDim2.new(1, -10, 0, contentHeight)
+    
+    -- Animate in
+    notification.Position = UDim2.new(0, 0, 1, 5)
+    local tween = game:GetService("TweenService"):Create(notification, 
+        TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {Position = UDim2.new(0, 0, 0, 5)}
+    )
+    tween:Play()
+    
+    -- Auto remove after duration
+    task.delay(duration or 3, function()
+        if notification and notification.Parent then
+            local outTween = game:GetService("TweenService"):Create(notification,
+                TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+                {Position = UDim2.new(0, 0, 1, 5)}
+            )
+            outTween:Play()
+            outTween.Completed:Connect(function()
+                notification:Destroy()
+            end)
+        end
+    end)
+    
+    return notification
+end
+
+-- ================================================================================
+-- CUSTOMIZABLE UI ELEMENT CLASS
+-- ================================================================================
+
+local Element = {}
+Element.__index = Element
+
+function Element.new(type, parent, name)
+    local self = {}
+    self.instance = Instance.new(type)
+    self.instance.Name = name or "Element"
+    self.instance.Parent = parent
+    self.properties = {}
+    self.customColors = {}
+    return setmetatable(self, Element)
+end
+
+function Element:SetColor(color, elementType)
+    if type(color) == "string" then
+        -- Check if it's a color name like "red.crimson" or "blue.ocean"
+        local colorParts = {}
+        for part in color:gmatch("[^.]+") do
+            table.insert(colorParts, part)
+        end
         
-        local tab = {
-            Button = btn,
-            Content = content,
-            Layout = layout,
-            Sections = {}
-        }
+        if #colorParts == 2 then
+            local colorFamily = ColorSystem.colors[colorParts[1]]
+            if colorFamily and colorFamily[colorParts[2]] then
+                color = colorFamily[colorParts[2]]
+            else
+                color = Color3.fromRGB(255, 255, 255)
+            end
+        elseif ColorSystem.colors[color] then
+            -- Default to bright variant
+            color = ColorSystem.colors[color].bright
+        elseif color:match("^#") then
+            color = ColorSystem.hexToRGB(color)
+        else
+            color = Color3.fromRGB(255, 255, 255)
+        end
+    end
+    
+    if elementType == "background" then
+        self.instance.BackgroundColor3 = color
+        self.instance.BackgroundTransparency = 0
+    elseif elementType == "text" then
+        self.instance.TextColor3 = color
+    elseif elementType == "border" then
+        self.instance.BorderColor3 = color
+    else
+        self.instance.BackgroundColor3 = color
+    end
+    
+    return self
+end
+
+function Element:SetGradient(color1, color2, direction)
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, color1),
+        ColorSequenceKeypoint.new(1, color2)
+    })
+    if direction == "horizontal" then
+        gradient.Rotation = 0
+    elseif direction == "vertical" then
+        gradient.Rotation = 90
+    elseif direction == "diagonal" then
+        gradient.Rotation = 45
+    end
+    gradient.Parent = self.instance
+    return self
+end
+
+function Element:SetSize(width, height, scale)
+    if scale then
+        self.instance.Size = UDim2.new(0, width, 0, height)
+    else
+        self.instance.Size = UDim2.new(width, 0, height, 0)
+    end
+    return self
+end
+
+function Element:SetPosition(x, y, anchorX, anchorY)
+    self.instance.Position = UDim2.new(x, 0, y, 0)
+    if anchorX and anchorY then
+        self.instance.AnchorPoint = Vector2.new(anchorX, anchorY)
+    end
+    return self
+end
+
+function Element:MakeDraggable()
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
+    
+    self.instance.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+           input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = self.instance.Position
+        end
+    end)
+    
+    self.instance.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or
+           input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+    
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or
+                         input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            self.instance.Position = UDim2.new(
+                startPos.X.Scale, startPos.X.Offset + delta.X,
+                startPos.Y.Scale, startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+    
+    return self
+end
+
+function Element:SetText(text)
+    if self.instance:IsA("TextLabel") or self.instance:IsA("TextButton") then
+        self.instance.Text = text
+    end
+    return self
+end
+
+function Element:OnClick(callback)
+    if self.instance:IsA("TextButton") or self.instance:IsA("ImageButton") then
+        self.instance.MouseButton1Click:Connect(callback)
+    end
+    return self
+end
+
+-- ================================================================================
+-- CUSTOMIZABLE HUB CLASS
+-- ================================================================================
+
+local Hub = {}
+Hub.__index = Hub
+
+function Hub:CreateWindow(title, customSettings)
+    local self = setmetatable({}, Hub)
+    
+    self.title = title or "FUBNIK Hub"
+    self.elements = {}
+    self.tabs = {}
+    self.currentTab = nil
+    self.customColors = customSettings or {}
+    
+    -- Create Main GUI
+    self.gui = Instance.new("ScreenGui")
+    self.gui.Name = "FUBNIK_Hub_v3"
+    self.gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    self.gui.Parent = game:GetService("CoreGui")
+    
+    -- Main Frame
+    self.mainFrame = Element.new("Frame", self.gui, "MainFrame")
+    self.mainFrame.instance.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+    self.mainFrame.instance.BorderSizePixel = 0
+    self.mainFrame.instance.ClipsDescendants = true
+    
+    -- Default size (will be adjustable)
+    self.mainFrame:SetSize(450, 600, false)
+    self.mainFrame:SetPosition(0.5, 0.5, 0.5, 0.5)
+    self.mainFrame.instance.Position = UDim2.new(0.5, -225, 0.5, -300)
+    self.mainFrame:MakeDraggable()
+    
+    -- Top Bar
+    self.topBar = Element.new("Frame", self.mainFrame.instance, "TopBar")
+    self.topBar:SetSize(1, 40, true)
+    self.topBar.instance.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
+    self.topBar.instance.BorderSizePixel = 0
+    
+    -- Title Label
+    self.titleLabel = Element.new("TextLabel", self.topBar.instance, "Title")
+    self.titleLabel:SetSize(0.6, 1, true)
+    self.titleLabel:SetPosition(0.05, 0)
+    self.titleLabel.instance.BackgroundTransparency = 1
+    self.titleLabel:SetText(title)
+    self.titleLabel.instance.TextSize = 18
+    self.titleLabel.instance.TextXAlignment = Enum.TextXAlignment.Left
+    self.titleLabel.instance.Font = Enum.Font.GothamBold
+    self.titleLabel:SetColor("white.pure", "text")
+    
+    -- Close Button
+    self.closeBtn = Element.new("TextButton", self.topBar.instance, "CloseBtn")
+    self.closeBtn:SetSize(40, 40, false)
+    self.closeBtn:SetPosition(1, 0, 1, 0)
+    self.closeBtn.instance.Text = "✕"
+    self.closeBtn.instance.TextSize = 20
+    self.closeBtn.instance.BackgroundTransparency = 1
+    self.closeBtn:SetColor("red.crimson", "text")
+    self.closeBtn:OnClick(function()
+        self.mainFrame.instance.Visible = not self.mainFrame.instance.Visible
+        if self.mainFrame.instance.Visible then
+            self:Notify("UI", "Hub shown", "info", 1.5)
+        end
+    end)
+    
+    -- Minimize Button
+    self.minimizeBtn = Element.new("TextButton", self.topBar.instance, "MinimizeBtn")
+    self.minimizeBtn:SetSize(40, 40, false)
+    self.minimizeBtn:SetPosition(1, -40, 1, 0)
+    self.minimizeBtn.instance.Text = "−"
+    self.minimizeBtn.instance.TextSize = 20
+    self.minimizeBtn.instance.BackgroundTransparency = 1
+    self.minimizeBtn:SetColor("white.pure", "text")
+    self.minimizeBtn:OnClick(function()
+        local minimized = self.mainFrame.instance.Size.Y.Offset < 100
+        if minimized then
+            self.mainFrame.instance:TweenSize(UDim2.new(0, 450, 0, 600), "Out", "Quad", 0.3)
+        else
+            self.mainFrame.instance:TweenSize(UDim2.new(0, 450, 0, 50), "Out", "Quad", 0.3)
+        end
+    end)
+    
+    -- Tab Container
+    self.tabContainer = Element.new("Frame", self.mainFrame.instance, "TabContainer")
+    self.tabContainer:SetSize(1, 40, true)
+    self.tabContainer:SetPosition(0, 40)
+    self.tabContainer.instance.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+    self.tabContainer.instance.BorderSizePixel = 0
+    
+    -- Tab Buttons Frame (scrollable)
+    self.tabButtonsFrame = Element.new("ScrollingFrame", self.tabContainer.instance, "TabButtons")
+    self.tabButtonsFrame:SetSize(1, 1, true)
+    self.tabButtonsFrame.instance.BackgroundTransparency = 1
+    self.tabButtonsFrame.instance.ScrollBarThickness = 3
+    self.tabButtonsFrame.instance.CanvasSize = UDim2.new(0, 0, 0, 0)
+    
+    -- Content Container
+    self.contentContainer = Element.new("Frame", self.mainFrame.instance, "Content")
+    self.contentContainer:SetSize(1, -80, true)
+    self.contentContainer:SetPosition(0, 80)
+    self.contentContainer.instance.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+    self.contentContainer.instance.BorderSizePixel = 0
+    
+    -- Make content scrollable
+    self.scrollFrame = Element.new("ScrollingFrame", self.contentContainer.instance, "ScrollFrame")
+    self.scrollFrame:SetSize(1, 1, true)
+    self.scrollFrame.instance.BackgroundTransparency = 1
+    self.scrollFrame.instance.CanvasSize = UDim2.new(0, 0, 0, 0)
+    self.scrollFrame.instance.ScrollBarThickness = 6
+    
+    self.contentLayout = Element.new("UIListLayout", self.scrollFrame.instance, "ContentLayout")
+    self.contentLayout.instance.Padding = UDim.new(0, 10)
+    self.contentLayout.instance.SortOrder = Enum.SortOrder.LayoutOrder
+    
+    -- Update canvas size when content changes
+    self.contentLayout.instance:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        self.scrollFrame.instance.CanvasSize = UDim2.new(0, 0, 0, self.contentLayout.instance.AbsoluteContentSize.Y + 20)
+    end)
+    
+    return self
+end
+
+function Hub:AddTab(tabName, icon, customSettings)
+    local tab = {}
+    tab.name = tabName
+    tab.icon = icon or "📄"
+    tab.sections = {}
+    tab.frame = Element.new("Frame", self.scrollFrame.instance, tabName .. "_Tab")
+    tab.frame:SetSize(1, 0, true)
+    tab.frame.instance.BackgroundTransparency = 1
+    tab.frame.instance.Visible = false
+    tab.frame.instance.LayoutOrder = 1
+    
+    -- Tab button
+    local btn = Element.new("TextButton", self.tabButtonsFrame.instance, tabName .. "_Btn")
+    btn:SetSize(80, 36, false)
+    btn:SetPosition(0, 0)
+    btn.instance.Text = icon .. " " .. tabName
+    btn.instance.TextSize = 13
+    btn.instance.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
+    btn.instance.BorderSizePixel = 0
+    btn.instance.AutoButtonColor = true
+    
+    -- Position buttons horizontally
+    local buttonPos = (#self.tabs) * 85
+    btn:SetPosition(buttonPos / self.tabButtonsFrame.instance.AbsoluteSize.X, 0)
+    self.tabButtonsFrame.instance.CanvasSize = UDim2.new(0, (#self.tabs + 1) * 85, 0, 0)
+    
+    btn:OnClick(function()
+        self:SelectTab(tabName)
+    end)
+    
+    tab.btn = btn
+    tab.sectionsLayout = Element.new("UIListLayout", tab.frame.instance, tabName .. "_Layout")
+    tab.sectionsLayout.instance.Padding = UDim.new(0, 10)
+    tab.sectionsLayout.instance.SortOrder = Enum.SortOrder.LayoutOrder
+    
+    -- Update tab frame height
+    tab.sectionsLayout.instance:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        tab.frame:SetSize(1, tab.sectionsLayout.instance.AbsoluteContentSize.Y + 20, false)
+    end)
+    
+    self.tabs[tabName] = tab
+    
+    if not self.currentTab then
+        self:SelectTab(tabName)
+    end
+    
+    return {
+        AddSection = function(_, sectionName)
+            return self:AddSection(tabName, sectionName)
+        end
+    }
+end
+
+function Hub:SelectTab(tabName)
+    if self.currentTab then
+        local oldTab = self.tabs[self.currentTab]
+        if oldTab then
+            oldTab.frame.instance.Visible = false
+            oldTab.btn.instance.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
+        end
+    end
+    
+    self.currentTab = tabName
+    local newTab = self.tabs[tabName]
+    if newTab then
+        newTab.frame.instance.Visible = true
+        newTab.btn.instance.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+    end
+end
+
+function Hub:AddSection(tabName, sectionName, customSettings)
+    local tab = self.tabs[tabName]
+    if not tab then return nil end
+    
+    local section = {}
+    section.frame = Element.new("Frame", tab.frame.instance, sectionName .. "_Section")
+    section.frame:SetSize(1, 0, true)
+    section.frame.instance.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+    section.frame.instance.BorderSizePixel = 0
+    
+    -- Section header
+    local header = Element.new("TextLabel", section.frame.instance, "Header")
+    header:SetSize(1, 35, true)
+    header:SetPosition(0, 0)
+    header.instance.Text = "  " .. sectionName
+    header.instance.TextSize = 14
+    header.instance.TextXAlignment = Enum.TextXAlignment.Left
+    header.instance.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
+    header.instance.BorderSizePixel = 0
+    header:SetColor("white.pure", "text")
+    header.instance.Font = Enum.Font.GothamBold
+    
+    -- Content container
+    section.content = Element.new("Frame", section.frame.instance, "Content")
+    section.content:SetSize(1, 0, true)
+    section.content:SetPosition(0, 35)
+    section.content.instance.BackgroundTransparency = 1
+    
+    section.layout = Element.new("UIListLayout", section.content.instance, "Layout")
+    section.layout.instance.Padding = UDim.new(0, 8)
+    section.layout.instance.SortOrder = Enum.SortOrder.LayoutOrder
+    
+    -- Update section height
+    section.layout.instance:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        local contentHeight = section.layout.instance.AbsoluteContentSize.Y
+        section.frame:SetSize(1, 35 + contentHeight + 15, false)
+        section.content:SetSize(1, contentHeight + 5, false)
+    end)
+    
+    table.insert(tab.sections, section)
+    
+    -- Return section methods
+    return {
+        AddLabel = function(_, text, color)
+            local label = Element.new("TextLabel", section.content.instance, "Label")
+            label:SetSize(1, 25, true)
+            label.instance.Text = "  " .. text
+            label.instance.TextSize = 13
+            label.instance.TextXAlignment = Enum.TextXAlignment.Left
+            label.instance.BackgroundTransparency = 1
+            if color then
+                label:SetColor(color, "text")
+            else
+                label:SetColor("gray.light", "text")
+            end
+            label.instance.Font = Enum.Font.Gotham
+            return {
+                SetText = function(_, newText)
+                    label.instance.Text = "  " .. newText
+                end
+            }
+        end,
         
-        -- Add Section method
-        function tab:AddSection(sectionOptions)
-            local sectionName = sectionOptions.Name or "Section"
-            local sectionColor = ParseColor(sectionOptions.Color or "neon blue")
-            local collapsible = sectionOptions.Collapsible ~= false
+        AddButton = function(_, buttonText, callback, color)
+            local btn = Element.new("TextButton", section.content.instance, "Button_" .. buttonText)
+            btn:SetSize(0.95, 35, true)
+            btn:SetPosition(0.025, 0)
+            btn.instance.Text = buttonText
+            btn.instance.TextSize = 14
+            btn.instance.Font = Enum.Font.GothamBold
+            btn.instance.BackgroundColor3 = color and (type(color) == "string" and (ColorSystem.colors[color] and ColorSystem.colors[color].bright or Color3.fromRGB(70, 70, 80)) or color) or Color3.fromRGB(70, 70, 80)
+            btn.instance.BorderSizePixel = 0
+            btn.instance.AutoButtonColor = true
+            btn:OnClick(callback)
+            return btn
+        end,
+        
+        AddToggle = function(_, toggleText, defaultValue, callback)
+            local container = Element.new("Frame", section.content.instance, "Toggle_" .. toggleText)
+            container:SetSize(1, 35, true)
+            container.instance.BackgroundTransparency = 1
             
-            local sectionFrame = Instance.new("Frame")
-            sectionFrame.Size = UDim2.new(1, 0, 0, 0)
-            sectionFrame.BackgroundTransparency = 1
-            sectionFrame.AutomaticSize = Enum.AutomaticSize.Y
-            sectionFrame.Parent = content
+            local label = Element.new("TextLabel", container.instance, "Label")
+            label:SetSize(0.7, 1, true)
+            label:SetPosition(0.05, 0)
+            label.instance.Text = toggleText
+            label.instance.TextSize = 13
+            label.instance.TextXAlignment = Enum.TextXAlignment.Left
+            label.instance.BackgroundTransparency = 1
+            label:SetColor("gray.light", "text")
             
-            local header = Instance.new("TextButton" if collapsible else "TextLabel")
-            header.Size = UDim2.new(1, 0, 0, sectionOptions.HeaderHeight or 32)
-            header.Text = sectionName
-            header.TextColor3 = sectionColor
-            header.TextSize = sectionOptions.FontSize or self.Sizing.FontSize
-            header.Font = Enum.Font[sectionOptions.Font or "GothamBold"]
-            header.TextXAlignment = Enum.TextXAlignment.Left
-            header.BackgroundTransparency = 1
-            header.Parent = sectionFrame
+            local toggleBtn = Element.new("TextButton", container.instance, "ToggleBtn")
+            toggleBtn:SetSize(60, 30, false)
+            toggleBtn:SetPosition(0.95, 0.5, 1, 0.5)
+            toggleBtn.instance.Text = defaultValue and "ON" or "OFF"
+            toggleBtn.instance.TextSize = 12
+            toggleBtn.instance.Font = Enum.Font.GothamBold
+            toggleBtn.instance.BackgroundColor3 = defaultValue and Color3.fromRGB(76, 175, 80) or Color3.fromRGB(244, 67, 54)
+            toggleBtn.instance.BorderSizePixel = 0
             
-            local line = Instance.new("Frame")
-            line.Size = UDim2.new(1, 0, 0, 1)
-            line.Position = UDim2.new(0, 0, 0, 30)
-            line.BackgroundColor3 = sectionColor
-            line.BackgroundTransparency = 0.5
-            line.Parent = sectionFrame
+            local state = defaultValue
+            toggleBtn:OnClick(function()
+                state = not state
+                toggleBtn.instance.Text = state and "ON" or "OFF"
+                toggleBtn.instance.BackgroundColor3 = state and Color3.fromRGB(76, 175, 80) or Color3.fromRGB(244, 67, 54)
+                callback(state)
+            end)
             
-            local elementsFrame = Instance.new("Frame")
-            elementsFrame.Size = UDim2.new(1, 0, 0, 0)
-            elementsFrame.Position = UDim2.new(0, 0, 0, 38)
-            elementsFrame.BackgroundTransparency = 1
-            elementsFrame.AutomaticSize = Enum.AutomaticSize.Y
-            elementsFrame.Parent = sectionFrame
-            
-            local elementsLayout = Instance.new("UIListLayout")
-            elementsLayout.Padding = UDim.new(0, sectionOptions.ElementSpacing or 8)
-            elementsLayout.Parent = elementsFrame
-            
-            local section = { Frame = sectionFrame, Elements = elementsFrame, Items = {} }
-            
-            -- Collapsible functionality
-            if collapsible then
-                local collapsed = false
-                local icon = Instance.new("TextLabel")
-                icon.Size = UDim2.new(0, 25, 1, 0)
-                icon.Position = UDim2.new(0, 5, 0, 0)
-                icon.Text = "▾"
-                icon.TextColor3 = sectionColor
-                icon.TextSize = 14
-                icon.BackgroundTransparency = 1
-                icon.Parent = header
-                header.Text = "   " .. sectionName
-                
-                header.MouseButton1Click:Connect(function()
-                    collapsed = not collapsed
-                    if collapsed then
-                        Tween(elementsFrame, {Size = UDim2.new(1, 0, 0, 0)}, 0.2)
-                        icon.Text = "▸"
-                    else
-                        Tween(elementsFrame, {Size = UDim2.new(1, 0, 0, elementsLayout.AbsoluteContentSize.Y)}, 0.2)
-                        icon.Text = "▾"
-                    end
-                end)
-            end
-            
-            -- Add Button
-            function section:AddButton(btnOptions)
-                local text = btnOptions.Name or "Button"
-                local callback = btnOptions.Callback or function() end
-                local btnColor = ParseColor(btnOptions.Color or "surface")
-                local hoverColor = ParseColor(btnOptions.HoverColor or "surface hover")
-                local textColor = ParseColor(btnOptions.TextColor or "white")
-                
-                local btn = Instance.new("TextButton")
-                btn.Size = UDim2.new(1, 0, 0, btnOptions.Height or self.Sizing.ButtonHeight)
-                btn.Text = text
-                btn.TextColor3 = textColor
-                btn.TextSize = btnOptions.FontSize or (self.Sizing.FontSize - 1)
-                btn.Font = Enum.Font[btnOptions.Font or "GothamSemibold"]
-                btn.BackgroundColor3 = btnColor
-                Round(btn, btnOptions.CornerRadius or 8)
-                Stroke(btn, 1, ParseColor(btnOptions.StrokeColor or "gray"))
-                btn.Parent = elementsFrame
-                
-                btn.MouseEnter:Connect(function() Tween(btn, {BackgroundColor3 = hoverColor}, 0.1) end)
-                btn.MouseLeave:Connect(function() Tween(btn, {BackgroundColor3 = btnColor}, 0.1) end)
-                btn.MouseButton1Click:Connect(callback)
-                
-                table.insert(section.Items, btn)
-                return btn
-            end
-            
-            -- Add Toggle
-            function section:AddToggle(toggleOptions)
-                local text = toggleOptions.Name or "Toggle"
-                local default = toggleOptions.Default or false
-                local callback = toggleOptions.Callback or function() end
-                
-                local frame = Instance.new("Frame")
-                frame.Size = UDim2.new(1, 0, 0, toggleOptions.Height or self.Sizing.ButtonHeight)
-                frame.BackgroundColor3 = ParseColor(toggleOptions.Color or "surface")
-                Round(frame, toggleOptions.CornerRadius or 8)
-                Stroke(frame, 1, ParseColor(toggleOptions.StrokeColor or "gray"))
-                frame.Parent = elementsFrame
-                
-                local label = Instance.new("TextLabel")
-                label.Size = UDim2.new(1, -70, 1, 0)
-                label.Position = UDim2.new(0, 12, 0, 0)
-                label.Text = text
-                label.TextColor3 = ParseColor(toggleOptions.TextColor or "white")
-                label.TextSize = toggleOptions.FontSize or (self.Sizing.FontSize - 1)
-                label.Font = Enum.Font[toggleOptions.Font or "Gotham"]
-                label.TextXAlignment = Enum.TextXAlignment.Left
-                label.BackgroundTransparency = 1
-                label.Parent = frame
-                
-                local toggleBtn = Instance.new("TextButton")
-                toggleBtn.Size = UDim2.new(0, 50, 0, 26)
-                toggleBtn.Position = UDim2.new(1, -60, 0.5, -13)
-                toggleBtn.Text = ""
-                toggleBtn.BackgroundColor3 = default and ParseColor(toggleOptions.ActiveColor or "neon blue") or ParseColor(toggleOptions.InactiveColor or "gray")
-                Round(toggleBtn, 13)
-                toggleBtn.Parent = frame
-                
-                local knob = Instance.new("Frame")
-                knob.Size = UDim2.new(0, 22, 0, 22)
-                knob.Position = UDim2.new(0, default and 26 or 2, 0.5, -11)
-                knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                Round(knob, 11)
-                knob.Parent = toggleBtn
-                
-                local state = default
-                local function toggle()
-                    state = not state
-                    Tween(toggleBtn, {BackgroundColor3 = state and ParseColor(toggleOptions.ActiveColor or "neon blue") or ParseColor(toggleOptions.InactiveColor or "gray")}, 0.2)
-                    Tween(knob, {Position = UDim2.new(0, state and 26 or 2, 0.5, -11)}, 0.2)
+            return {
+                setValue = function(_, newState)
+                    state = newState
+                    toggleBtn.instance.Text = state and "ON" or "OFF"
+                    toggleBtn.instance.BackgroundColor3 = state and Color3.fromRGB(76, 175, 80) or Color3.fromRGB(244, 67, 54)
                     callback(state)
                 end
-                toggleBtn.MouseButton1Click:Connect(toggle)
-                
-                table.insert(section.Items, frame)
-                return { setValue = function(v) state = v toggleBtn.BackgroundColor3 = state and ParseColor(toggleOptions.ActiveColor or "neon blue") or ParseColor(toggleOptions.InactiveColor or "gray") knob.Position = UDim2.new(0, state and 26 or 2, 0.5, -11) callback(state) end, getValue = function() return state end }
-            end
-            
-            -- Add Slider
-            function section:AddSlider(sliderOptions)
-                local text = sliderOptions.Name or "Slider"
-                local min = sliderOptions.Min or 0
-                local max = sliderOptions.Max or 100
-                local default = sliderOptions.Default or min
-                local callback = sliderOptions.Callback or function() end
-                
-                local frame = Instance.new("Frame")
-                frame.Size = UDim2.new(1, 0, 0, sliderOptions.Height or 80)
-                frame.BackgroundColor3 = ParseColor(sliderOptions.Color or "surface")
-                Round(frame, sliderOptions.CornerRadius or 8)
-                Stroke(frame, 1, ParseColor(sliderOptions.StrokeColor or "gray"))
-                frame.Parent = elementsFrame
-                
-                local label = Instance.new("TextLabel")
-                label.Size = UDim2.new(1, -80, 0, 25)
-                label.Position = UDim2.new(0, 12, 0, 5)
-                label.Text = text
-                label.TextColor3 = ParseColor(sliderOptions.TextColor or "white")
-                label.TextSize = sliderOptions.FontSize or (self.Sizing.FontSize - 1)
-                label.Font = Enum.Font[sliderOptions.Font or "GothamSemibold"]
-                label.TextXAlignment = Enum.TextXAlignment.Left
-                label.BackgroundTransparency = 1
-                label.Parent = frame
-                
-                local valueLabel = Instance.new("TextLabel")
-                valueLabel.Size = UDim2.new(0, 60, 0, 25)
-                valueLabel.Position = UDim2.new(1, -72, 0, 5)
-                valueLabel.Text = tostring(default)
-                valueLabel.TextColor3 = ParseColor(sliderOptions.ValueColor or "neon blue")
-                valueLabel.TextSize = sliderOptions.FontSize or (self.Sizing.FontSize - 2)
-                valueLabel.Font = Enum.Font[sliderOptions.Font or "GothamBold"]
-                valueLabel.TextXAlignment = Enum.TextXAlignment.Right
-                valueLabel.BackgroundTransparency = 1
-                valueLabel.Parent = frame
-                
-                local sliderBg = Instance.new("Frame")
-                sliderBg.Size = UDim2.new(1, -24, 0, 4)
-                sliderBg.Position = UDim2.new(0, 12, 0, 52)
-                sliderBg.BackgroundColor3 = ParseColor(sliderOptions.BgColor or "dark gray")
-                Round(sliderBg, 2)
-                sliderBg.Parent = frame
-                
-                local fill = Instance.new("Frame")
-                local percent = (default - min) / (max - min)
-                fill.Size = UDim2.new(percent, 0, 1, 0)
-                fill.BackgroundColor3 = ParseColor(sliderOptions.FillColor or "neon blue")
-                Round(fill, 2)
-                fill.Parent = sliderBg
-                
-                local knob = Instance.new("Frame")
-                knob.Size = UDim2.new(0, 18, 0, 18)
-                knob.Position = UDim2.new(percent, -9, 0.5, -9)
-                knob.BackgroundColor3 = ParseColor(sliderOptions.KnobColor or "neon blue")
-                Round(knob, 9)
-                knob.Parent = sliderBg
-                
-                local dragging = false
-                local value = default
-                local function update(input)
-                    local rel = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
-                    local newVal = min + (rel * (max - min))
-                    value = sliderOptions.Precision and math.floor(newVal * (10 ^ sliderOptions.Precision) + 0.5) / (10 ^ sliderOptions.Precision) or math.floor(newVal + 0.5)
-                    valueLabel.Text = tostring(value)
-                    fill.Size = UDim2.new(rel, 0, 1, 0)
-                    knob.Position = UDim2.new(rel, -9, 0.5, -9)
-                    callback(value)
-                end
-                knob.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end end)
-                UIS.InputChanged:Connect(function(input) if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then update(input) end end)
-                UIS.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
-                sliderBg.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then update(input) dragging = true end end)
-                
-                table.insert(section.Items, frame)
-                return { setValue = function(v) value = math.clamp(v, min, max) local p = (value - min) / (max - min) valueLabel.Text = tostring(value) fill.Size = UDim2.new(p, 0, 1, 0) knob.Position = UDim2.new(p, -9, 0.5, -9) callback(value) end, getValue = function() return value end }
-            end
-            
-            -- Add Label
-            function section:AddLabel(labelOptions)
-                local text = labelOptions.Name or "Label"
-                local label = Instance.new("TextLabel")
-                label.Size = UDim2.new(1, 0, 0, labelOptions.Height or 28)
-                label.Position = UDim2.new(0, labelOptions.Padding or 12, 0, 0)
-                label.Text = text
-                label.TextColor3 = ParseColor(labelOptions.Color or "light gray")
-                label.TextSize = labelOptions.FontSize or (self.Sizing.FontSize - 2)
-                label.Font = Enum.Font[labelOptions.Font or "Gotham"]
-                label.TextXAlignment = Enum.TextXAlignment[labelOptions.Alignment or "Left"]
-                label.BackgroundTransparency = 1
-                label.Parent = elementsFrame
-                table.insert(section.Items, label)
-                return label
-            end
-            
-            -- Add Gamepass Button
-            function section:AddGamepassButton(gpOptions)
-                local gamepassId = gpOptions.GamepassId
-                local name = gpOptions.Name or "Purchase Gamepass"
-                local price = gpOptions.Price or "???"
-                local onPurchase = gpOptions.OnPurchase or function() end
-                
-                local btn = Instance.new("TextButton")
-                btn.Size = UDim2.new(1, 0, 0, gpOptions.Height or (self.Sizing.ButtonHeight + 10))
-                btn.BackgroundColor3 = ParseColor(gpOptions.Color or "dark green")
-                Round(btn, gpOptions.CornerRadius or 8)
-                Stroke(btn, 1, ParseColor(gpOptions.StrokeColor or "green"))
-                btn.Parent = elementsFrame
-                
-                local icon = Instance.new("TextLabel")
-                icon.Size = UDim2.new(0, 35, 1, 0)
-                icon.Position = UDim2.new(0, 12, 0, 0)
-                icon.Text = gpOptions.Icon or "💰"
-                icon.TextSize = 20
-                icon.BackgroundTransparency = 1
-                icon.Parent = btn
-                
-                local titleL = Instance.new("TextLabel")
-                titleL.Size = UDim2.new(1, -100, 0, 22)
-                titleL.Position = UDim2.new(0, 55, 0, 8)
-                titleL.Text = name
-                titleL.TextColor3 = ParseColor(gpOptions.TitleColor or "white")
-                titleL.TextSize = gpOptions.FontSize or self.Sizing.FontSize
-                titleL.Font = Enum.Font[gpOptions.Font or "GothamSemibold"]
-                titleL.TextXAlignment = Enum.TextXAlignment.Left
-                titleL.BackgroundTransparency = 1
-                titleL.Parent = btn
-                
-                local priceL = Instance.new("TextLabel")
-                priceL.Size = UDim2.new(1, -100, 0, 18)
-                priceL.Position = UDim2.new(0, 55, 0, 30)
-                priceL.Text = price .. " Robux"
-                priceL.TextColor3 = ParseColor(gpOptions.PriceColor or "light green")
-                priceL.TextSize = gpOptions.PriceFontSize or (self.Sizing.FontSize - 2)
-                priceL.Font = Enum.Font[gpOptions.Font or "Gotham"]
-                priceL.TextXAlignment = Enum.TextXAlignment.Left
-                priceL.BackgroundTransparency = 1
-                priceL.Parent = btn
-                
-                btn.MouseEnter:Connect(function() Tween(btn, {BackgroundColor3 = ParseColor(gpOptions.HoverColor or "green")}, 0.15) end)
-                btn.MouseLeave:Connect(function() Tween(btn, {BackgroundColor3 = ParseColor(gpOptions.Color or "dark green")}, 0.15) end)
-                btn.MouseButton1Click:Connect(function()
-                    MPS:PromptGamePassPurchase(LP, gamepassId)
-                    Notify("Gamepass", "Purchase prompt sent for " .. name, "info", 2)
-                    onPurchase()
-                end)
-                
-                table.insert(section.Items, btn)
-                return btn
-            end
-            
-            table.insert(tab.Sections, section)
-            return section
-        end
+            }
+        end,
         
-        table.insert(window.Tabs, tab)
-        if #window.Tabs == 1 then select() end
-        return tab
-    end
-    
-    -- Utility methods
-    function window:Notify(title, msg, type, dur, actionText, actionCallback)
-        return Notify(title, msg, type, dur, actionText, actionCallback)
-    end
-    
-    function window:Destroy()
-        self.ScreenGui:Destroy()
-    end
-    
-    function window:SetSize(width, height)
-        self.MainFrame.Size = UDim2.new(0, width, 0, height)
-        self.MainFrame.Position = UDim2.new(0.5, -width/2, 0.5, -height/2)
-    end
-    
-    function window:SetPosition(x, y)
-        self.MainFrame.Position = UDim2.new(0, x, 0, y)
-    end
-    
-    function window:SetColor(part, color)
-        if part == "accent" then Stroke(self.MainFrame, 1.5, ParseColor(color))
-        elseif part == "background" then self.MainFrame.BackgroundColor3 = ParseColor(color)
-        elseif part == "sidebar" then self.Sidebar.BackgroundColor3 = ParseColor(color)
+        AddSlider = function(_, sliderText, minVal, maxVal, defaultVal, callback)
+            local container = Element.new("Frame", section.content.instance, "Slider_" .. sliderText)
+            container:SetSize(1, 55, true)
+            container.instance.BackgroundTransparency = 1
+            
+            local label = Element.new("TextLabel", container.instance, "Label")
+            label:SetSize(1, 20, true)
+            label.instance.Text = sliderText .. ": " .. defaultVal
+            label.instance.TextSize = 12
+            label.instance.TextXAlignment = Enum.TextXAlignment.Left
+            label.instance.BackgroundTransparency = 1
+            label:SetColor("gray.light", "text")
+            
+            local slider = Instance.new("TextBox")
+            slider.Size = UDim2.new(0.7, 0, 0, 30)
+            slider.Position = UDim2.new(0.05, 0, 0.4, 0)
+            slider.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
+            slider.BorderSizePixel = 0
+            slider.TextColor3 = Color3.fromRGB(255, 255, 255)
+            slider.Text = tostring(defaultVal)
+            slider.TextSize = 14
+            slider.Parent = container.instance
+            
+            local function updateValue(val)
+                local clamped = math.clamp(tonumber(val) or defaultVal, minVal, maxVal)
+                label.instance.Text = sliderText .. ": " .. math.floor(clamped)
+                slider.Text = tostring(math.floor(clamped))
+                callback(math.floor(clamped))
+            end
+            
+            slider.FocusLost:Connect(function()
+                updateValue(slider.Text)
+            end)
+            
+            updateValue(defaultVal)
+            
+            return {
+                setValue = function(_, val)
+                    updateValue(val)
+                end
+            }
+        end,
+        
+        AddDropdown = function(_, dropdownText, options, defaultOption, callback)
+            local container = Element.new("Frame", section.content.instance, "Dropdown_" .. dropdownText)
+            container:SetSize(1, 45, true)
+            container.instance.BackgroundTransparency = 1
+            
+            local label = Element.new("TextLabel", container.instance, "Label")
+            label:SetSize(0.4, 1, true)
+            label:SetPosition(0.05, 0)
+            label.instance.Text = dropdownText
+            label.instance.TextSize = 13
+            label.instance.TextXAlignment = Enum.TextXAlignment.Left
+            label.instance.BackgroundTransparency = 1
+            label:SetColor("gray.light", "text")
+            
+            local dropdown = Instance.new("TextButton")
+            dropdown.Size = UDim2.new(0.45, 0, 0, 35)
+            dropdown.Position = UDim2.new(0.5, 0, 0.05, 0)
+            dropdown.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+            dropdown.BorderSizePixel = 0
+            dropdown.Text = defaultOption or options[1]
+            dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
+            dropdown.TextSize = 13
+            dropdown.Font = Enum.Font.Gotham
+            dropdown.Parent = container.instance
+            
+            local isOpen = false
+            local listFrame = nil
+            
+            dropdown.MouseButton1Click:Connect(function()
+                if isOpen then
+                    if listFrame then listFrame:Destroy() end
+                    isOpen = false
+                    return
+                end
+                
+                isOpen = true
+                listFrame = Instance.new("Frame")
+                listFrame.Size = UDim2.new(0.45, 0, 0, #options * 30)
+                listFrame.Position = UDim2.new(0.5, 0, 0.05, 40)
+                listFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 58)
+                listFrame.BorderSizePixel = 0
+                listFrame.ClipsDescendants = true
+                listFrame.Parent = container.instance
+                
+                local listLayout = Instance.new("UIListLayout")
+                listLayout.Padding = UDim.new(0, 2)
+                listLayout.Parent = listFrame
+                
+                for _, option in pairs(options) do
+                    local btn = Instance.new("TextButton")
+                    btn.Size = UDim2.new(1, 0, 0, 30)
+                    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+                    btn.BorderSizePixel = 0
+                    btn.Text = option
+                    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    btn.TextSize = 12
+                    btn.Parent = listFrame
+                    
+                    btn.MouseButton1Click:Connect(function()
+                        dropdown.Text = option
+                        callback(option)
+                        listFrame:Destroy()
+                        isOpen = false
+                    end)
+                end
+            end)
+            
+            return {
+                setValue = function(_, val)
+                    dropdown.Text = val
+                    callback(val)
+                end
+            }
+        end,
+        
+        AddGamepassButton = function(_, passId, buttonText, afterPurchaseCallback, color, runIfOwned)
+            local btn = Element.new("TextButton", section.content.instance, "Gamepass_" .. passId)
+            btn:SetSize(0.95, 40, true)
+            btn:SetPosition(0.025, 0)
+            btn.instance.Text = "🎮 " .. buttonText
+            btn.instance.TextSize = 14
+            btn.instance.Font = Enum.Font.GothamBold
+            btn.instance.BackgroundColor3 = color and (type(color) == "string" and (ColorSystem.colors[color] and ColorSystem.colors[color].bright or Color3.fromRGB(70, 70, 80)) or color) or Color3.fromRGB(88, 86, 214)
+            btn.instance.BorderSizePixel = 0
+            
+            -- Check if already owned
+            if GamepassSystem:Owns(passId) and runIfOwned then
+                afterPurchaseCallback("already_owned")
+                btn.instance.Text = "✓ " .. buttonText
+                btn.instance.BackgroundColor3 = Color3.fromRGB(76, 175, 80)
+            end
+            
+            btn:OnClick(function()
+                GamepassSystem:PromptPurchase(passId)
+                GamepassSystem:OnPurchase(passId, function(status)
+                    if status == "purchased" or status == "already_owned" then
+                        btn.instance.Text = "✓ " .. buttonText
+                        btn.instance.BackgroundColor3 = Color3.fromRGB(76, 175, 80)
+                        afterPurchaseCallback(status)
+                    end
+                end, true)
+            end)
+            
+            return btn
         end
-    end
-    
-    return window
+    }
 end
 
+function Hub:Notify(title, message, type, duration, customButtons)
+    if type == "success" then
+        title = "✓ " .. title
+    elseif type == "error" then
+        title = "✗ " .. title
+    elseif type == "warning" then
+        title = "⚠ " .. title
+    elseif type == "info" then
+        title = "ℹ " .. title
+    end
+    
+    return NotificationSystem:Show(title, message, duration or 3, customButtons)
+end
+
+function Hub:AddCustomNotificationButton(buttonText, buttonColor, callback)
+    NotificationSystem:AddButton(buttonText, buttonColor, callback)
+end
+
+function Hub:GetDeviceInfo()
+    local screenSize = game:GetService("GuiService"):GetScreenResolution()
+    local deviceType = "PC"
+    
+    if game:GetService("UserInputService").TouchEnabled then
+        if screenSize.X < 800 then
+            deviceType = "Phone"
+        else
+            deviceType = "Tablet"
+        end
+    end
+    
+    return deviceType, screenSize.X, screenSize.Y
+end
+
+function Hub:GetGamepassSystem()
+    return GamepassSystem
+end
+
+function Hub:GetColorSystem()
+    return ColorSystem
+end
+
+-- ================================================================================
+-- EXAMPLE USAGE (REMOVE THIS IN YOUR ACTUAL SCRIPT - THIS IS JUST FOR DEMO)
+-- ================================================================================
+
+--[[
+-- UNCOMMENT THIS TO SEE AN EXAMPLE OF HOW TO USE THE FRAMEWORK
+
+local MyHub = Hub:CreateWindow("My Custom Hub")
+
+-- Example with gamepass (replace with your actual pass ID)
+local PlayerTab = MyHub:AddTab("Player", "👤")
+
+local MovementSection = PlayerTab:AddSection("Movement")
+
+MovementSection:AddButton("Fly Mode", function()
+    -- User adds their own fling/fly script here
+    print("Fly mode activated - user adds their own code")
+end, "blue.ocean")
+
+-- Gamepass example - FLING AFTER PURCHASE
+local PassSection = PlayerTab:AddSection("Gamepasses")
+
+PassSection:AddGamepassButton(1859760880, "FLING POWER (Purchase)", function(status)
+    if status == "purchased" or status == "already_owned" then
+        -- User adds their own fling logic here
+        print("FLING ACTIVATED - user adds their own fling code")
+        local char = game.Players.LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            -- This is just an example - user customizes this
+            char.HumanoidRootPart.Velocity = Vector3.new(0, 100, 0)
+        end
+    end
+end, "red.crimson", true)
+
+-- Color customization example
+local CustomSection = PlayerTab:AddSection("Colors")
+CustomSection:AddButton("Change Tab Color", function()
+    for _, tab in pairs(MyHub.tabs) do
+        tab.btn.instance.BackgroundColor3 = ColorSystem.colors.purple.bright
+    end
+    MyHub:Notify("Colors", "Tabs changed to purple!", "success", 2)
+end, "purple.violet")
+
+--]]
+
+return Hub
