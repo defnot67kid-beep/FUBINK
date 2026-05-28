@@ -1,426 +1,709 @@
 --[[
-    ╔═══════════════════════════════════════════════════════════════════════════════════════════════════╗
-    ║                    SCRIPT HUB - BUILT WITH UI FRAMEWORK LOADER                                    ║
-    ║                         Using Framework's Native UI Tools Only                                    ║
-    ╚═══════════════════════════════════════════════════════════════════════════════════════════════════╝
+    ╔═══════════════════════════════════════════════════════════╗
+    ║                                                           ║
+    ║   ███████╗██╗   ██╗██████╗ ███╗   ██╗██╗██╗  ██╗         ║
+    ║   ██╔════╝██║   ██║██╔══██╗████╗  ██║██║╚██╗██╔╝         ║
+    ║   █████╗  ██║   ██║██████╔╝██╔██╗ ██║██║ ╚███╔╝          ║
+    ║   ██╔══╝  ██║   ██║██╔══██╗██║╚██╗██║██║ ██╔██╗          ║
+    ║   ██║     ╚██████╔╝██████╔╝██║ ╚████║██║██╔╝ ██╗          ║
+    ║   ╚═╝      ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝          ║
+    ║                                                           ║
+    ║              SIMPLE SCRIPT HUB v1.0                       ║
+    ║         Clean | Works 100% | No Errors | Fast             ║
+    ╚═══════════════════════════════════════════════════════════╝
 --]]
 
--- Load the UI Framework
-local UIFramework = loadstring(game:HttpGet("https://raw.githubusercontent.com/defnot67kid-beep/FUBINK/refs/heads/main/FUBNIKLOADER.LUA"))()
+-- ============================================================================
+-- SERVICES
+-- ============================================================================
+local Players = game:GetService("Players")
+local LP = Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+local TS = game:GetService("TweenService")
+local CG = game:GetService("CoreGui")
+local TPS = game:GetService("TeleportService")
+local LS = game:GetService("Lighting")
 
--- Wait for framework
-task.wait(1)
-
--- ============================================
--- SCRIPT DATABASE
--- ============================================
-local ScriptsDB = {
-    -- Movement Scripts
-    {name = "Speed Boost", category = "Movement", description = "Run super fast!", 
-     script = 'game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 150\nprint("Speed boosted!")'},
-    
-    {name = "Super Jump", category = "Movement", description = "Jump really high!",
-     script = 'game.Players.LocalPlayer.Character.Humanoid.JumpPower = 200\nprint("Jump power increased!")'},
-    
-    {name = "Fly Mode", category = "Movement", description = "Fly anywhere!",
-     script = [[
-local p = game.Players.LocalPlayer
-local c = p.Character or p.CharacterAdded:Wait()
-local h = c:WaitForChild("Humanoid")
-local f = false
-local bv = Instance.new("BodyVelocity")
-bv.MaxForce = Vector3.new(1,1,1)*10^5
-
-game:GetService("UserInputService").JumpRequested:Connect(function()
-    f = not f
-    if f then
-        bv.Parent = c.HumanoidRootPart
-        bv.Velocity = Vector3.new(0,50,0)
-    else
-        bv:Destroy()
-    end
-end)
-print("Press space to toggle fly!")
-]]},
-    
-    -- Combat Scripts
-    {name = "Auto Click", category = "Combat", description = "Auto click fast!",
-     script = [[
-local mouse = game.Players.LocalPlayer:GetMouse()
-while true do
-    mouse1click()
-    task.wait(0.05)
+-- ============================================================================
+-- SIMPLE UTILITIES
+-- ============================================================================
+local function MakeRounded(frame, r)
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, r or 8)
+    c.Parent = frame
 end
-]]},
-    
-    {name = "Aimbot", category = "Combat", description = "Auto aim at players!",
-     script = [[
-local plrs = game:GetService("Players")
-local ls = plrs.LocalPlayer
-local mouse = ls:GetMouse()
 
-while true do
-    local closest = nil
-    local dist = math.huge
-    for _,v in pairs(plrs:GetPlayers()) do
-        if v ~= ls and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-            local d = (v.Character.HumanoidRootPart.Position - ls.Character.HumanoidRootPart.Position).Magnitude
-            if d < dist then
-                dist = d
-                closest = v
-            end
+local function MakeStroke(frame, t, c)
+    local s = Instance.new("UIStroke")
+    s.Thickness = t or 1
+    s.Color = c or Color3.fromRGB(100, 100, 255)
+    s.Parent = frame
+end
+
+local function Tween(obj, props, time)
+    local t = TS:Create(obj, TweenInfo.new(time or 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), props)
+    t:Play()
+    return t
+end
+
+-- ============================================================================
+-- NOTIFICATION SYSTEM
+-- ============================================================================
+local NotifyContainer = nil
+
+local function CreateNotifyContainer()
+    if NotifyContainer then return end
+    NotifyContainer = Instance.new("Frame")
+    NotifyContainer.Name = "NotifContainer"
+    NotifyContainer.Size = UDim2.new(0, 320, 1, -20)
+    NotifyContainer.Position = UDim2.new(1, -340, 0, 10)
+    NotifyContainer.BackgroundTransparency = 1
+    NotifyContainer.Parent = CG
+end
+
+local function Notify(title, msg, typ, duration)
+    CreateNotifyContainer()
+    typ = typ or "info"
+    duration = duration or 3
+    
+    local colors = {
+        info = Color3.fromRGB(80, 180, 255),
+        success = Color3.fromRGB(80, 255, 120),
+        warn = Color3.fromRGB(255, 200, 80),
+        error = Color3.fromRGB(255, 80, 100)
+    }
+    
+    local icons = {info = "ℹ️", success = "✅", warn = "⚠️", error = "❌"}
+    
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, -10, 0, 0)
+    frame.Position = UDim2.new(0, 5, 1, -10)
+    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+    frame.BackgroundTransparency = 0.1
+    frame.AutomaticSize = Enum.AutomaticSize.Y
+    MakeRounded(frame, 12)
+    MakeStroke(frame, 1, colors[typ])
+    frame.Parent = NotifyContainer
+    
+    local iconL = Instance.new("TextLabel")
+    iconL.Size = UDim2.new(0, 30, 0, 30)
+    iconL.Position = UDim2.new(0, 12, 0, 12)
+    iconL.Text = icons[typ]
+    iconL.TextSize = 18
+    iconL.BackgroundTransparency = 1
+    iconL.Parent = frame
+    
+    local titleL = Instance.new("TextLabel")
+    titleL.Size = UDim2.new(1, -55, 0, 25)
+    titleL.Position = UDim2.new(0, 48, 0, 8)
+    titleL.Text = title
+    titleL.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleL.TextSize = 14
+    titleL.Font = Enum.Font.GothamBold
+    titleL.TextXAlignment = Enum.TextXAlignment.Left
+    titleL.BackgroundTransparency = 1
+    titleL.Parent = frame
+    
+    local msgL = Instance.new("TextLabel")
+    msgL.Size = UDim2.new(1, -55, 0, 0)
+    msgL.Position = UDim2.new(0, 48, 0, 33)
+    msgL.Text = msg
+    msgL.TextColor3 = Color3.fromRGB(180, 180, 210)
+    msgL.TextSize = 12
+    msgL.Font = Enum.Font.Gotham
+    msgL.TextXAlignment = Enum.TextXAlignment.Left
+    msgL.TextWrapped = true
+    msgL.BackgroundTransparency = 1
+    msgL.AutomaticSize = Enum.AutomaticSize.Y
+    msgL.Parent = frame
+    
+    local h = msgL.AbsoluteSize.Y + 55
+    Tween(frame, {Size = UDim2.new(1, -10, 0, h)}, 0.3)
+    
+    task.spawn(function()
+        task.wait(duration)
+        if frame then
+            Tween(frame, {Size = UDim2.new(1, -10, 0, 0), BackgroundTransparency = 1}, 0.2)
+            task.wait(0.2)
+            frame:Destroy()
         end
-    end
-    if closest then
-        mouse.Target = closest.Character.HumanoidRootPart
-    end
-    task.wait()
+    end)
 end
-]]},
-    
-    -- Visual Scripts
-    {name = "ESP", category = "Visual", description = "See players through walls!",
-     script = [[
-for _,v in pairs(game:GetService("Players"):GetPlayers()) do
-    if v ~= game.Players.LocalPlayer and v.Character then
-        local b = Instance.new("BoxHandleAdornment")
-        b.Adornee = v.Character
-        b.Size = Vector3.new(4,5,2)
-        b.Color3 = Color3.fromRGB(255,0,0)
-        b.AlwaysOnTop = true
-        b.ZIndex = 10
-        b.Parent = v.Character
-    end
-end
-]]},
-    
-    {name = "Full Bright", category = "Visual", description = "No more darkness!",
-     script = 'game:GetService("Lighting").Brightness = 2\ngame:GetService("Lighting").GlobalShadows = false\nprint("Full bright activated!")'},
-    
-    {name = "XRay Vision", category = "Visual", description = "See through everything!",
-     script = [[
-for _,v in pairs(game:GetService("Workspace"):GetDescendants()) do
-    if v:IsA("BasePart") then
-        v.LocalTransparencyModifier = 0.5
-    end
-end
-print("XRay activated!")]]},
-    
-    -- Utility Scripts
-    {name = "Anti AFK", category = "Utility", description = "Never get kicked for AFK",
-     script = [[
-local vu = game:GetService("VirtualUser")
-game:GetService("Players").LocalPlayer.Idled:Connect(function()
-    vu:Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-    task.wait(1)
-    vu:Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-end)
-print("Anti AFK activated!")]]},
-    
-    {name = "Infinite Yield", category = "Utility", description = "Best admin command script",
-     script = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()'},
-    
-    {name = "Auto Farm", category = "Utility", description = "Auto collect items!",
-     script = [[
-local plr = game.Players.LocalPlayer
-while true do
-    for _,v in pairs(workspace:GetDescendants()) do
-        if v:IsA("Tool") or v:IsA("Part") and v.Name:find("Chest") then
-            plr.Character.HumanoidRootPart.CFrame = v.CFrame
-            task.wait(0.5)
-        end
-    end
-    task.wait()
-end
-]]},
-    
-    -- Fun Scripts
-    {name = "Infinite Jump", category = "Fun", description = "Jump infinitely!",
-     script = [[
-local uis = game:GetService("UserInputService")
-local plr = game.Players.LocalPlayer
-uis.JumpRequested:Connect(function()
-    if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-        plr.Character.Humanoid:ChangeState("Jumping")
-    end
-end)
-print("Infinite jump activated!")]]},
-    
-    {name = "Size Changer", category = "Fun", description = "Change your size!",
-     script = [[
-local plr = game.Players.LocalPlayer
-local size = 5
-plr.Character.HumanoidRootPart.Size = Vector3.new(size,size,size)
-plr.Character.HumanoidRootPart.Transparency = 0.5
-print("Size changed!")]]},
+
+-- ============================================================================
+-- SIMPLE GUI CREATOR
+-- ============================================================================
+local Hub = {
+    windows = {},
+    currentWindow = nil
 }
 
--- ============================================
--- CREATE MAIN HUB WINDOW USING FRAMEWORK
--- ============================================
-
--- Create main window
-local MainHub = UIFramework.Tools.WindowManager.CreateWindow(
-    "🌟 SCRIPT HUB v3.0 | " .. ScriptHub.Name,
-    UDim2.new(0, 1000, 0, 700),
-    UDim2.new(0.5, -500, 0.5, -350),
-    true
-)
-
--- Create tabs for categories
-local Categories = {}
-for _, script in pairs(ScriptsDB) do
-    if not Categories[script.category] then
-        Categories[script.category] = {}
-    end
-    table.insert(Categories[script.category], script)
-end
-
--- Build tab names
-local tabNames = {}
-for catName, _ in pairs(Categories) do
-    table.insert(tabNames, {name = catName .. " (" .. #Categories[catName] .. ")", content = nil})
-end
-
--- Create the tab system
-local tabSystem = UIFramework.Tools.TabSystem.CreateTabs(MainHub.Content, tabNames, nil, UDim2.new(1, 0, 1, 0))
-
--- Function to create script buttons in a category
-local function PopulateCategory(container, categoryName)
-    local scripts = Categories[categoryName]
-    local yOffset = 20
+function Hub:CreateWindow(name, width, height)
+    width = width or 400
+    height = height or 550
     
-    -- Category header
-    local header = UIFramework.Tools.ButtonCreator.CreateButton(
-        container,
-        "📁 " .. categoryName .. " Scripts",
-        UDim2.new(0, 20, 0, yOffset),
-        UDim2.new(0, 960, 0, 40),
-        nil,
-        {color = Color3.fromRGB(50, 50, 70), cornerRadius = 8}
-    )
-    header.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
-    header.TextSize = 18
-    yOffset = yOffset + 55
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "ScriptHub_" .. tostring(os.time())
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = CG
     
-    -- Create each script button
-    for i, scriptData in ipairs(scripts) do
-        -- Script button
-        local scriptBtn = UIFramework.Tools.ButtonCreator.CreateButton(
-            container,
-            "▶ " .. scriptData.name,
-            UDim2.new(0, 40, 0, yOffset),
-            UDim2.new(0, 300, 0, 50),
-            function()
-                -- Execute the script
-                local success, err = loadstring(scriptData.script)()
-                if success then
-                    UIFramework.Tools.NotificationSystem.ShowNotification(
-                        "✅ Script Executed",
-                        scriptData.name .. " has been loaded!",
-                        2,
-                        "success"
-                    )
-                else
-                    UIFramework.Tools.NotificationSystem.ShowNotification(
-                        "❌ Script Failed",
-                        "Error: " .. tostring(err),
-                        3,
-                        "error"
-                    )
+    local main = Instance.new("Frame")
+    main.Size = UDim2.new(0, width, 0, height)
+    main.Position = UDim2.new(0.5, -width/2, 0.5, -height/2)
+    main.BackgroundColor3 = Color3.fromRGB(18, 18, 28)
+    MakeRounded(main, 12)
+    MakeStroke(main, 1.5, Color3.fromRGB(100, 100, 255))
+    main.Parent = screenGui
+    
+    -- Title bar
+    local titleBar = Instance.new("Frame")
+    titleBar.Size = UDim2.new(1, 0, 0, 45)
+    titleBar.BackgroundTransparency = 1
+    titleBar.Parent = main
+    
+    local titleText = Instance.new("TextLabel")
+    titleText.Size = UDim2.new(1, -50, 1, 0)
+    titleText.Position = UDim2.new(0, 15, 0, 0)
+    titleText.Text = name
+    titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleText.TextSize = 16
+    titleText.Font = Enum.Font.GothamBold
+    titleText.TextXAlignment = Enum.TextXAlignment.Left
+    titleText.BackgroundTransparency = 1
+    titleText.Parent = titleBar
+    
+    -- Close button
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 35, 0, 35)
+    closeBtn.Position = UDim2.new(1, -42, 0, 5)
+    closeBtn.Text = "✕"
+    closeBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+    closeBtn.TextSize = 16
+    closeBtn.Font = Enum.Font.Gotham
+    closeBtn.BackgroundTransparency = 1
+    closeBtn.Parent = titleBar
+    
+    -- Tabs container (sidebar)
+    local tabsFrame = Instance.new("Frame")
+    tabsFrame.Size = UDim2.new(0, 120, 1, -45)
+    tabsFrame.Position = UDim2.new(0, 0, 0, 45)
+    tabsFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+    tabsFrame.BackgroundTransparency = 0.5
+    tabsFrame.Parent = main
+    
+    local tabList = Instance.new("ScrollingFrame")
+    tabList.Size = UDim2.new(1, -10, 1, -10)
+    tabList.Position = UDim2.new(0, 5, 0, 5)
+    tabList.BackgroundTransparency = 1
+    tabList.BorderSizePixel = 0
+    tabList.ScrollBarThickness = 2
+    tabList.Parent = tabsFrame
+    
+    local tabLayout = Instance.new("UIListLayout")
+    tabLayout.Padding = UDim.new(0, 5)
+    tabLayout.Parent = tabList
+    
+    -- Content area
+    local contentFrame = Instance.new("Frame")
+    contentFrame.Size = UDim2.new(1, -135, 1, -55)
+    contentFrame.Position = UDim2.new(0, 130, 0, 50)
+    contentFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+    contentFrame.BackgroundTransparency = 0.3
+    MakeRounded(contentFrame, 8)
+    contentFrame.Parent = main
+    
+    -- Make draggable
+    local dragging = false
+    local dragStart, startPos
+    
+    titleBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = main.Position
+        end
+    end)
+    
+    UIS.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    closeBtn.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
+    
+    local window = {
+        screenGui = screenGui,
+        main = main,
+        contentFrame = contentFrame,
+        tabList = tabList,
+        tabLayout = tabLayout,
+        tabs = {},
+        currentTab = nil
+    }
+    
+    function window:AddTab(name, icon)
+        icon = icon or ""
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, -10, 0, 40)
+        btn.Position = UDim2.new(0, 5, 0, 0)
+        btn.Text = icon ~= "" and (icon .. "  " .. name) or name
+        btn.TextColor3 = Color3.fromRGB(180, 180, 210)
+        btn.TextSize = 12
+        btn.Font = Enum.Font.Gotham
+        btn.TextXAlignment = Enum.TextXAlignment.Left
+        btn.BackgroundTransparency = 1
+        MakeRounded(btn, 6)
+        btn.Parent = self.tabList
+        
+        local tabContent = Instance.new("ScrollingFrame")
+        tabContent.Size = UDim2.new(1, -20, 1, -20)
+        tabContent.Position = UDim2.new(0, 10, 0, 10)
+        tabContent.BackgroundTransparency = 1
+        tabContent.BorderSizePixel = 0
+        tabContent.ScrollBarThickness = 3
+        tabContent.Visible = false
+        tabContent.CanvasSize = UDim2.new(0, 0, 0, 0)
+        tabContent.Parent = self.contentFrame
+        
+        local contentLayout = Instance.new("UIListLayout")
+        contentLayout.Padding = UDim.new(0, 10)
+        contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        contentLayout.Parent = tabContent
+        
+        contentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            tabContent.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
+        end)
+        
+        btn.MouseButton1Click:Connect(function()
+            for _, t in pairs(self.tabs) do
+                t.content.Visible = false
+                Tween(t.button, {BackgroundColor3 = Color3.fromRGB(0, 0, 0), TextColor3 = Color3.fromRGB(180, 180, 210)}, 0.1)
+                t.button.BackgroundTransparency = 1
+            end
+            tabContent.Visible = true
+            Tween(btn, {BackgroundColor3 = Color3.fromRGB(40, 40, 70), TextColor3 = Color3.fromRGB(255, 255, 255)}, 0.1)
+            btn.BackgroundTransparency = 0.1
+        end)
+        
+        local tab = {
+            button = btn,
+            content = tabContent,
+            layout = contentLayout,
+            elements = {}
+        }
+        
+        function tab:AddSection(title)
+            local sectionFrame = Instance.new("Frame")
+            sectionFrame.Size = UDim2.new(1, 0, 0, 0)
+            sectionFrame.BackgroundTransparency = 1
+            sectionFrame.AutomaticSize = Enum.AutomaticSize.Y
+            sectionFrame.Parent = tabContent
+            
+            local header = Instance.new("TextLabel")
+            header.Size = UDim2.new(1, 0, 0, 30)
+            header.Text = title
+            header.TextColor3 = Color3.fromRGB(100, 100, 255)
+            header.TextSize = 14
+            header.Font = Enum.Font.GothamBold
+            header.TextXAlignment = Enum.TextXAlignment.Left
+            header.BackgroundTransparency = 1
+            header.Parent = sectionFrame
+            
+            local line = Instance.new("Frame")
+            line.Size = UDim2.new(1, 0, 0, 1)
+            line.Position = UDim2.new(0, 0, 0, 28)
+            line.BackgroundColor3 = Color3.fromRGB(100, 100, 150)
+            line.BackgroundTransparency = 0.5
+            line.Parent = sectionFrame
+            
+            local elementsFrame = Instance.new("Frame")
+            elementsFrame.Size = UDim2.new(1, 0, 0, 0)
+            elementsFrame.Position = UDim2.new(0, 0, 0, 35)
+            elementsFrame.BackgroundTransparency = 1
+            elementsFrame.AutomaticSize = Enum.AutomaticSize.Y
+            elementsFrame.Parent = sectionFrame
+            
+            local elementsLayout = Instance.new("UIListLayout")
+            elementsLayout.Padding = UDim.new(0, 8)
+            elementsLayout.Parent = elementsFrame
+            
+            local section = {
+                frame = sectionFrame,
+                elementsFrame = elementsFrame,
+                elements = {}
+            }
+            
+            function section:AddButton(text, callback)
+                local btn = Instance.new("TextButton")
+                btn.Size = UDim2.new(1, 0, 0, 40)
+                btn.Text = text
+                btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                btn.TextSize = 13
+                btn.Font = Enum.Font.GothamSemibold
+                btn.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
+                MakeRounded(btn, 8)
+                MakeStroke(btn, 1, Color3.fromRGB(80, 80, 120))
+                btn.Parent = elementsFrame
+                
+                btn.MouseEnter:Connect(function()
+                    Tween(btn, {BackgroundColor3 = Color3.fromRGB(55, 55, 85)}, 0.1)
+                end)
+                
+                btn.MouseLeave:Connect(function()
+                    Tween(btn, {BackgroundColor3 = Color3.fromRGB(35, 35, 55)}, 0.1)
+                end)
+                
+                btn.MouseButton1Click:Connect(function()
+                    if callback then callback() end
+                    Notify(text, "Executed!", "success", 1.5)
+                end)
+                
+                table.insert(section.elements, btn)
+                return btn
+            end
+            
+            function section:AddToggle(text, default, callback)
+                local frame = Instance.new("Frame")
+                frame.Size = UDim2.new(1, 0, 0, 40)
+                frame.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
+                MakeRounded(frame, 8)
+                MakeStroke(frame, 1, Color3.fromRGB(80, 80, 120))
+                frame.Parent = elementsFrame
+                
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(1, -70, 1, 0)
+                label.Position = UDim2.new(0, 12, 0, 0)
+                label.Text = text
+                label.TextColor3 = Color3.fromRGB(255, 255, 255)
+                label.TextSize = 13
+                label.Font = Enum.Font.Gotham
+                label.TextXAlignment = Enum.TextXAlignment.Left
+                label.BackgroundTransparency = 1
+                label.Parent = frame
+                
+                local toggleBtn = Instance.new("TextButton")
+                toggleBtn.Size = UDim2.new(0, 50, 0, 26)
+                toggleBtn.Position = UDim2.new(1, -60, 0.5, -13)
+                toggleBtn.Text = ""
+                toggleBtn.BackgroundColor3 = default and Color3.fromRGB(100, 100, 255) or Color3.fromRGB(80, 80, 120)
+                MakeRounded(toggleBtn, 13)
+                toggleBtn.Parent = frame
+                
+                local knob = Instance.new("Frame")
+                knob.Size = UDim2.new(0, 22, 0, 22)
+                knob.Position = UDim2.new(0, default and 26 or 2, 0.5, -11)
+                knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                MakeRounded(knob, 11)
+                knob.Parent = toggleBtn
+                
+                local state = default
+                
+                toggleBtn.MouseButton1Click:Connect(function()
+                    state = not state
+                    Tween(toggleBtn, {BackgroundColor3 = state and Color3.fromRGB(100, 100, 255) or Color3.fromRGB(80, 80, 120)}, 0.2)
+                    Tween(knob, {Position = UDim2.new(0, state and 26 or 2, 0.5, -11)}, 0.2)
+                    if callback then callback(state) end
+                    Notify(text, state and "Enabled" or "Disabled", state and "success" or "info", 1)
+                end)
+                
+                table.insert(section.elements, {frame = frame, toggle = toggleBtn, state = state})
+                return {setValue = function(v) 
+                    state = v
+                    toggleBtn.BackgroundColor3 = state and Color3.fromRGB(100, 100, 255) or Color3.fromRGB(80, 80, 120)
+                    knob.Position = UDim2.new(0, state and 26 or 2, 0.5, -11)
+                    if callback then callback(state) end
+                end}
+            end
+            
+            function section:AddSlider(text, min, max, default, callback)
+                local frame = Instance.new("Frame")
+                frame.Size = UDim2.new(1, 0, 0, 70)
+                frame.BackgroundColor3 = Color3.fromRGB(35, 35, 55)
+                MakeRounded(frame, 8)
+                MakeStroke(frame, 1, Color3.fromRGB(80, 80, 120))
+                frame.Parent = elementsFrame
+                
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(1, -80, 0, 25)
+                label.Position = UDim2.new(0, 12, 0, 5)
+                label.Text = text
+                label.TextColor3 = Color3.fromRGB(255, 255, 255)
+                label.TextSize = 13
+                label.Font = Enum.Font.GothamSemibold
+                label.TextXAlignment = Enum.TextXAlignment.Left
+                label.BackgroundTransparency = 1
+                label.Parent = frame
+                
+                local valueLabel = Instance.new("TextLabel")
+                valueLabel.Size = UDim2.new(0, 60, 0, 25)
+                valueLabel.Position = UDim2.new(1, -72, 0, 5)
+                valueLabel.Text = tostring(default)
+                valueLabel.TextColor3 = Color3.fromRGB(100, 100, 255)
+                valueLabel.TextSize = 12
+                valueLabel.Font = Enum.Font.GothamBold
+                valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+                valueLabel.BackgroundTransparency = 1
+                valueLabel.Parent = frame
+                
+                local sliderBg = Instance.new("Frame")
+                sliderBg.Size = UDim2.new(1, -24, 0, 4)
+                sliderBg.Position = UDim2.new(0, 12, 0, 45)
+                sliderBg.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+                MakeRounded(sliderBg, 2)
+                sliderBg.Parent = frame
+                
+                local fill = Instance.new("Frame")
+                local percent = (default - min) / (max - min)
+                fill.Size = UDim2.new(percent, 0, 1, 0)
+                fill.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
+                MakeRounded(fill, 2)
+                fill.Parent = sliderBg
+                
+                local knob = Instance.new("Frame")
+                knob.Size = UDim2.new(0, 16, 0, 16)
+                knob.Position = UDim2.new(percent, -8, 0.5, -8)
+                knob.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
+                MakeRounded(knob, 8)
+                knob.Parent = sliderBg
+                
+                local dragging = false
+                local value = default
+                
+                local function update(pos)
+                    local relative = math.clamp((pos.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
+                    local newVal = min + (relative * (max - min))
+                    value = math.floor(newVal + 0.5)
+                    valueLabel.Text = tostring(value)
+                    fill.Size = UDim2.new(relative, 0, 1, 0)
+                    knob.Position = UDim2.new(relative, -8, 0.5, -8)
+                    if callback then callback(value) end
                 end
-            end,
-            {color = Color3.fromRGB(0, 120, 255), cornerRadius = 8}
-        )
+                
+                knob.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        dragging = true
+                    end
+                end)
+                
+                UIS.InputChanged:Connect(function(input)
+                    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                        update(input)
+                    end
+                end)
+                
+                UIS.InputEnded:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        dragging = false
+                    end
+                end)
+                
+                sliderBg.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        update(input)
+                        dragging = true
+                    end
+                end)
+                
+                table.insert(section.elements, frame)
+                return {setValue = function(v) 
+                    value = math.clamp(v, min, max)
+                    local p = (value - min) / (max - min)
+                    valueLabel.Text = tostring(value)
+                    fill.Size = UDim2.new(p, 0, 1, 0)
+                    knob.Position = UDim2.new(p, -8, 0.5, -8)
+                    if callback then callback(value) end
+                end}
+            end
+            
+            function section:AddLabel(text)
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(1, 0, 0, 25)
+                label.Position = UDim2.new(0, 12, 0, 0)
+                label.Text = text
+                label.TextColor3 = Color3.fromRGB(180, 180, 210)
+                label.TextSize = 11
+                label.Font = Enum.Font.Gotham
+                label.TextXAlignment = Enum.TextXAlignment.Left
+                label.BackgroundTransparency = 1
+                label.Parent = elementsFrame
+                table.insert(section.elements, label)
+                return label
+            end
+            
+            table.insert(tab.elements, section)
+            return section
+        end
         
-        -- Description label
-        local descLabel = Instance.new("TextLabel")
-        descLabel.Size = UDim2.new(0, 600, 0, 50)
-        descLabel.Position = UDim2.new(0, 360, 0, yOffset)
-        descLabel.Text = "📝 " .. scriptData.description
-        descLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-        descLabel.BackgroundTransparency = 1
-        descLabel.TextXAlignment = Enum.TextXAlignment.Left
-        descLabel.Font = Enum.Font.Gotham
-        descLabel.TextSize = 14
-        descLabel.Parent = container
+        table.insert(self.tabs, tab)
         
-        yOffset = yOffset + 65
+        -- Select first tab
+        if #self.tabs == 1 then
+            tabContent.Visible = true
+            Tween(btn, {BackgroundColor3 = Color3.fromRGB(40, 40, 70), TextColor3 = Color3.fromRGB(255, 255, 255)}, 0.1)
+            btn.BackgroundTransparency = 0.1
+        end
+        
+        return tab
     end
     
-    -- Update canvas size
-    if container:IsA("ScrollingFrame") then
-        container.CanvasSize = UDim2.new(0, 0, 0, yOffset + 50)
+    function window:Notify(title, msg, typ, duration)
+        Notify(title, msg, typ, duration)
     end
+    
+    table.insert(Hub.windows, window)
+    Hub.currentWindow = window
+    
+    return window
 end
 
--- Populate each tab
-for i, tabData in ipairs(tabNames) do
-    local categoryName = tabData.name:match("(.-) %(")
-    local container = tabSystem:GetContent(i)
-    PopulateCategory(container, categoryName)
-end
+-- ============================================================================
+-- CREATE THE SCRIPT HUB
+-- ============================================================================
+local HubWindow = Hub:CreateWindow("Script Hub Pro", 400, 600)
 
--- ============================================
--- ADD EXTRA FEATURES TO THE HUB
--- ============================================
+-- ========== TAB 1: PLAYER ==========
+local PlayerTab = HubWindow:AddTab("Player", "👤")
 
--- Add a toolbar at the top
-local toolbar = Instance.new("Frame")
-toolbar.Size = UDim2.new(1, 0, 0, 60)
-toolbar.Position = UDim2.new(0, 0, 0, 50)
-toolbar.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-toolbar.BackgroundTransparency = 0
-toolbar.Parent = MainHub.Frame
+local Movement = PlayerTab:AddSection("Movement")
+Movement:AddSlider("Walk Speed", 16, 250, 16, function(v)
+    local hrp = LP.Character and LP.Character:FindFirstChild("Humanoid")
+    if hrp then hrp.WalkSpeed = v end
+end)
 
--- Search bar
-local searchBox = UIFramework.Tools.InputCreator.CreateTextBox(
-    toolbar,
-    "🔍 Search scripts...",
-    UDim2.new(0, 20, 0, 12),
-    UDim2.new(0, 250, 0, 36),
-    function(text)
-        -- Search functionality
-        UIFramework.Tools.NotificationSystem.ShowNotification(
-            "Search",
-            "Searching for: " .. text,
-            1.5
-        )
+Movement:AddSlider("Jump Power", 50, 250, 50, function(v)
+    local hrp = LP.Character and LP.Character:FindFirstChild("Humanoid")
+    if hrp then hrp.JumpPower = v end
+end)
+
+Movement:AddButton("Super Jump (100)", function()
+    local hrp = LP.Character and LP.Character:FindFirstChild("Humanoid")
+    if hrp then hrp.JumpPower = 100 end
+end)
+
+Movement:AddButton("Reset Jump (50)", function()
+    local hrp = LP.Character and LP.Character:FindFirstChild("Humanoid")
+    if hrp then hrp.JumpPower = 50 end
+end)
+
+local Visuals = PlayerTab:AddSection("Visuals")
+
+local noclipState = false
+local noclipToggle = Visuals:AddToggle("Noclip", false, function(s)
+    noclipState = s
+end)
+
+-- Noclip loop
+task.spawn(function()
+    while task.wait(0.1) do
+        if noclipState and LP.Character then
+            for _, part in pairs(LP.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
     end
-)
+end)
 
--- Settings button
-local settingsBtn = UIFramework.Tools.ButtonCreator.CreateButton(
-    toolbar,
-    "⚙ Settings",
-    UDim2.new(1, -220, 0, 12),
-    UDim2.new(0, 100, 0, 36),
-    function()
-        -- Create settings window
-        local settingsWin = UIFramework.Tools.WindowManager.CreateWindow(
-            "⚙ Settings",
-            UDim2.new(0, 400, 0, 300),
-            UDim2.new(0.5, -200, 0.5, -150),
-            true
-        )
-        
-        -- Auto execute toggle
-        local autoExecToggle = UIFramework.Tools.ToggleCreator.CreateToggle(
-            settingsWin.Content,
-            "Auto Execute Scripts",
-            false,
-            UDim2.new(0, 20, 0, 20),
-            UDim2.new(0, 360, 0, 40),
-            function(value)
-                ScriptHub.Settings.AutoExecute = value
-            end
-        )
-        
-        -- Notifications toggle
-        local notifToggle = UIFramework.Tools.ToggleCreator.CreateToggle(
-            settingsWin.Content,
-            "Show Notifications",
-            true,
-            UDim2.new(0, 20, 0, 70),
-            UDim2.new(0, 360, 0, 40),
-            function(value)
-                ScriptHub.Settings.NotificationEnabled = value
-            end
-        )
-        
-        -- Clear history button
-        local clearBtn = UIFramework.Tools.ButtonCreator.CreateButton(
-            settingsWin.Content,
-            "Clear Script History",
-            UDim2.new(0, 20, 0, 130),
-            UDim2.new(0, 360, 0, 40),
-            function()
-                ScriptHub.LoadedScripts = {}
-                UIFramework.Tools.NotificationSystem.ShowNotification(
-                    "History Cleared",
-                    "Script history has been cleared!",
-                    2,
-                    "success"
-                )
-            end
-        )
-    end,
-    {color = Color3.fromRGB(80, 80, 100), cornerRadius = 8}
-)
+local fullbrightState = false
+Visuals:AddToggle("Fullbright", false, function(s)
+    fullbrightState = s
+    if s then
+        LS.Brightness = 2
+        LS.GlobalShadows = false
+        LS.ClockTime = 12
+    else
+        LS.Brightness = 0.5
+        LS.GlobalShadows = true
+    end
+end)
 
--- Credits button
-local creditsBtn = UIFramework.Tools.ButtonCreator.CreateButton(
-    toolbar,
-    "ℹ Info",
-    UDim2.new(1, -110, 0, 12),
-    UDim2.new(0, 100, 0, 36),
-    function()
-        UIFramework.Tools.NotificationSystem.ShowNotification(
-            "📢 Script Hub Info",
-            "Version: 3.0.0\nTotal Scripts: " .. #ScriptsDB .. "\nMade with UI Framework",
-            4,
-            "info"
-        )
-    end,
-    {color = Color3.fromRGB(80, 80, 100), cornerRadius = 8}
-)
+-- ========== TAB 2: COMBAT ==========
+local CombatTab = HubWindow:AddTab("Combat", "⚔️")
 
--- ============================================
--- ADD STATS DISPLAY
--- ============================================
-local statsFrame = Instance.new("Frame")
-statsFrame.Size = UDim2.new(0, 200, 0, 60)
-statsFrame.Position = UDim2.new(1, -210, 1, -70)
-statsFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-statsFrame.BackgroundTransparency = 0.8
-statsFrame.Parent = MainHub.Frame
+local Scripts = CombatTab:AddSection("Scripts")
+Scripts:AddButton("Infinite Yield", function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+end)
 
-local statsCorner = Instance.new("UICorner")
-statsCorner.CornerRadius = UDim.new(0, 8)
-statsCorner.Parent = statsFrame
+Scripts:AddButton("Cmd-X", function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/CMD-X/CMD-X/master/Source', true))()
+end)
 
-local scriptCountLabel = Instance.new("TextLabel")
-scriptCountLabel.Size = UDim2.new(1, 0, 0, 30)
-scriptCountLabel.Text = "📚 Scripts: " .. #ScriptsDB
-scriptCountLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-scriptCountLabel.BackgroundTransparency = 1
-scriptCountLabel.Font = Enum.Font.Gotham
-scriptCountLabel.TextSize = 14
-scriptCountLabel.Parent = statsFrame
+Scripts:AddButton("Dex Explorer", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/DexV2.lua"))()
+end)
 
-local versionLabel = Instance.new("TextLabel")
-versionLabel.Size = UDim2.new(1, 0, 0, 30)
-versionLabel.Position = UDim2.new(0, 0, 0, 30)
-versionLabel.Text = "📌 Version: " .. ScriptHub.Version
-versionLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-versionLabel.BackgroundTransparency = 1
-versionLabel.Font = Enum.Font.Gotham
-versionLabel.TextSize = 12
-versionLabel.Parent = statsFrame
+local Combat = CombatTab:AddSection("Combat")
+Combat:AddButton("Kill All (Visual)", function()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character and p.Character:FindFirstChild("Humanoid") then
+            p.Character.Humanoid.Health = 0
+        end
+    end
+end)
 
--- ============================================
--- WELCOME MESSAGE
--- ============================================
-task.wait(0.5)
+-- ========== TAB 3: UTILITY ==========
+local UtilityTab = HubWindow:AddTab("Utility", "🔧")
 
-UIFramework.Tools.NotificationSystem.ShowNotification(
-    "🎉 Script Hub Loaded!",
-    "Welcome to " .. ScriptHub.Name .. " v" .. ScriptHub.Version .. "\n" .. #ScriptsDB .. " scripts available!",
-    3,
-    "success"
-)
+local Teleport = UtilityTab:AddSection("Teleport")
+Teleport:AddButton("Rejoin Game", function()
+    TPS:Teleport(game.PlaceId, LP)
+end)
 
-print("")
-print("╔══════════════════════════════════════════════════════════════════╗")
-print("║                    SCRIPT HUB LOADED SUCCESSFULLY               ║")
-print("║                                                                  ║")
-print("║  📊 Total Scripts: " .. #ScriptsDB .. "                                            ║")
-print("║  📁 Categories: " .. #tabNames .. "                                                ║")
-print("║  🚀 Ready to use - Click any script button to execute!          ║")
-print("║                                                                  ║")
-print("║  💡 Tip: Use the search bar to find specific scripts            ║")
-print("╚══════════════════════════════════════════════════════════════════╝")
-print("")
+Teleport:AddButton("Server Hop", function()
+    TPS:Teleport(game.PlaceId)
+end)
 
--- Return hub for external use
-return ScriptHub
+local Misc = UtilityTab:AddSection("Misc")
+Misc:AddButton("Heal Full", function()
+    local hrp = LP.Character and LP.Character:FindFirstChild("Humanoid")
+    if hrp then hrp.Health = hrp.MaxHealth end
+end)
+
+Misc:AddButton("Copy Game ID", function()
+    if setclipboard then
+        setclipboard(game.PlaceId)
+        HubWindow:Notify("Copied", "Game ID copied!", "success", 1.5)
+    end
+end)
+
+-- ========== TAB 4: SETTINGS ==========
+local SettingsTab = HubWindow:AddTab("Settings", "⚙️")
+
+local Display = SettingsTab:AddSection("Display")
+Display:AddButton("Small Mode (350x500)", function()
+    HubWindow.main.Size = UDim2.new(0, 350, 0, 500)
+    HubWindow.main.Position = UDim2.new(0.5, -175, 0.5, -250)
+end)
+
+Display:AddButton("Default Mode (400x600)", function()
+    HubWindow.main.Size = UDim2.new(0, 400, 0, 600)
+    HubWindow.main.Position = UDim2.new(0.5, -200, 0.5, -300)
+end)
+
+Display:AddButton("Large Mode (500x700)", function()
+    HubWindow.main.Size = UDim2.new(0, 500, 0, 700)
+    HubWindow.main.Position = UDim2.new(0.5, -250, 0.5, -350)
+end)
+
+local Info = SettingsTab:AddSection("Info")
+Info:AddLabel("Username: " .. LP.Name)
+Info:AddLabel("Display: " .. (LP.DisplayName or LP.Name))
+Info:AddLabel("User ID: " .. LP.UserId)
+Info:AddLabel("Game: " .. game.Name)
+
+-- Welcome notification
+HubWindow:Notify("Welcome!", "Script Hub Pro Loaded Successfully!", "success", 3)
+
+print("Script Hub Pro Loaded!")
