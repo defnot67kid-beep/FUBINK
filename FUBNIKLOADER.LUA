@@ -8,8 +8,9 @@
     ║   ██║     ╚██████╔╝██████╔╝██║ ╚████║██║██╔╝ ██╗          ║
     ║   ╚═╝      ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝╚═╝  ╚═╝          ║
     ║                                                           ║
-    ║         FUBNIK v6.0 - LOADER FRAMEWORK                    ║
-    ║    Empty hub ready for scripts to populate                ║
+    ║         FUBNIK v6.1 - GUI MODULE                          ║
+    ║    Simple GUI creation for non-coders                     ║
+    ║    NO pre-made tabs - Build your own!                     ║
     ╚═══════════════════════════════════════════════════════════╝
 --]]
 
@@ -29,15 +30,13 @@ local Device = {
     Padding = 0
 }
 
--- Auto detect device and calculate perfect sizes
 function Device:Detect()
     local camera = workspace.CurrentCamera
     self.ScreenWidth = camera.ViewportSize.X
     self.ScreenHeight = camera.ViewportSize.Y
     local isMobile = game:GetService("UserInputService").TouchEnabled
     local aspectRatio = self.ScreenWidth / self.ScreenHeight
-    
-    -- Detect device type
+
     if isMobile then
         self.Type = "Mobile"
         self.RecommendedWidth = math.min(360, self.ScreenWidth - 20)
@@ -75,23 +74,9 @@ function Device:Detect()
         self.Padding = 15
         self.Scale = 1.1
     end
-    
-    print(string.format("[FUBNIK] Device Detected: %s | Size: %dx%d | Scale: %.2f", 
-        self.Type, self.RecommendedWidth, self.RecommendedHeight, self.Scale))
-    
+
+    print(string.format("[FUBNIK] Device: %s | %dx%d", self.Type, self.RecommendedWidth, self.RecommendedHeight))
     return self
-end
-
-function Device:GetWindowSize()
-    return self.RecommendedWidth, self.RecommendedHeight
-end
-
-function Device:GetButtonHeight()
-    return self.ButtonHeight
-end
-
-function Device:GetFontSize(baseSize)
-    return math.floor(baseSize * (self.FontSize / 13))
 end
 
 Device:Detect()
@@ -104,11 +89,9 @@ local LP = Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
 local CG = game:GetService("CoreGui")
-local TPS = game:GetService("TeleportService")
-local LS = game:GetService("Lighting")
 
 -- ============================================================================
--- SIMPLE UTILITIES
+-- UTILITIES
 -- ============================================================================
 local function MakeRounded(frame, r)
     local c = Instance.new("UICorner")
@@ -124,9 +107,7 @@ local function MakeStroke(frame, t, c)
 end
 
 local function Tween(obj, props, time)
-    local t = TS:Create(obj, TweenInfo.new(time or 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), props)
-    t:Play()
-    return t
+    return TS:Create(obj, TweenInfo.new(time or 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), props):Play()
 end
 
 -- ============================================================================
@@ -155,7 +136,6 @@ local function Notify(title, msg, typ, duration)
         warn = Color3.fromRGB(255, 200, 80),
         error = Color3.fromRGB(255, 80, 100)
     }
-    
     local icons = {info = "ℹ️", success = "✅", warn = "⚠️", error = "❌"}
     
     local frame = Instance.new("Frame")
@@ -214,83 +194,16 @@ local function Notify(title, msg, typ, duration)
 end
 
 -- ============================================================================
--- LOADING SCREEN
+-- GUI MODULE (FIXED TAB OVERLAY)
 -- ============================================================================
-local function ShowLoading(message, duration)
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "LoadingScreen"
-    screenGui.ResetOnSpawn = false
-    screenGui.Parent = CG
-    
-    local overlay = Instance.new("Frame")
-    overlay.Size = UDim2.new(1, 0, 1, 0)
-    overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    overlay.BackgroundTransparency = 0.5
-    overlay.Parent = screenGui
-    
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 250, 0, 120)
-    frame.Position = UDim2.new(0.5, -125, 0.5, -60)
-    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
-    MakeRounded(frame, 12)
-    MakeStroke(frame, 1, Color3.fromRGB(100, 100, 255))
-    frame.Parent = overlay
-    
-    local text = Instance.new("TextLabel")
-    text.Size = UDim2.new(1, -20, 0, 40)
-    text.Position = UDim2.new(0, 10, 0, 10)
-    text.Text = message or "Loading..."
-    text.TextColor3 = Color3.fromRGB(255, 255, 255)
-    text.TextSize = 16
-    text.Font = Enum.Font.GothamBold
-    text.BackgroundTransparency = 1
-    text.Parent = frame
-    
-    local spinner = Instance.new("Frame")
-    spinner.Size = UDim2.new(0, 30, 0, 30)
-    spinner.Position = UDim2.new(0.5, -15, 0, 60)
-    spinner.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
-    MakeRounded(spinner, 15)
-    spinner.Parent = frame
-    
-    local spin = 0
-    local conn
-    conn = game:GetService("RunService").RenderStepped:Connect(function()
-        spin = spin + 10
-        spinner.Rotation = spin
-    end)
-    
-    if duration then
-        task.spawn(function()
-            task.wait(duration)
-            conn:Disconnect()
-            screenGui:Destroy()
-        end)
-    end
-    
-    return {
-        Hide = function()
-            conn:Disconnect()
-            screenGui:Destroy()
-        end
-    }
-end
-
--- ============================================================================
--- GUI CREATOR WITH AUTO SCALING (FIXED TAB OVERLAY)
--- ============================================================================
-local Hub = {
-    windows = {},
-    currentWindow = nil,
-    Device = Device
-}
+local Hub = { windows = {} }
 
 function Hub:CreateWindow(name, customWidth, customHeight)
     local width = customWidth or Device.RecommendedWidth
     local height = customHeight or Device.RecommendedHeight
     
     local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "ScriptHub_" .. tostring(os.time())
+    screenGui.Name = "FUBNIK_" .. tostring(os.time())
     screenGui.ResetOnSpawn = false
     screenGui.Parent = CG
     
@@ -311,7 +224,7 @@ function Hub:CreateWindow(name, customWidth, customHeight)
     local titleText = Instance.new("TextLabel")
     titleText.Size = UDim2.new(1, -50, 1, 0)
     titleText.Position = UDim2.new(0, 15, 0, 0)
-    titleText.Text = name .. " (" .. Device.Type .. ")"
+    titleText.Text = name
     titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
     titleText.TextSize = Device.FontSize
     titleText.Font = Enum.Font.GothamBold
@@ -330,7 +243,10 @@ function Hub:CreateWindow(name, customWidth, customHeight)
     closeBtn.BackgroundTransparency = 1
     closeBtn.Parent = titleBar
     
-    -- Tabs container (sidebar)
+    closeBtn.MouseButton1Click:Connect(function() screenGui:Destroy() end)
+    closeBtn.TouchTap:Connect(function() screenGui:Destroy() end)
+    
+    -- Sidebar
     local tabsFrame = Instance.new("Frame")
     tabsFrame.Size = UDim2.new(0, Device.SidebarWidth, 1, -45)
     tabsFrame.Position = UDim2.new(0, 0, 0, 45)
@@ -384,30 +300,23 @@ function Hub:CreateWindow(name, customWidth, customHeight)
         end
     end)
     
-    closeBtn.MouseButton1Click:Connect(function()
-        screenGui:Destroy()
-    end)
-    
-    closeBtn.TouchTap:Connect(function()
-        screenGui:Destroy()
-    end)
-    
     local window = {
         screenGui = screenGui,
         main = main,
         contentFrame = contentFrame,
         tabList = tabList,
-        tabLayout = tabLayout,
         tabs = {},
         currentTab = nil,
         device = Device
     }
     
+    -- ========================================================================
+    -- FIXED: AddTab with proper tab switching (no overlay)
+    -- ========================================================================
     function window:AddTab(name, icon)
         icon = icon or ""
         local btn = Instance.new("TextButton")
         btn.Size = UDim2.new(1, -10, 0, Device.ButtonHeight)
-        btn.Position = UDim2.new(0, 5, 0, 0)
         btn.Text = icon ~= "" and (icon .. "  " .. name) or name
         btn.TextColor3 = Color3.fromRGB(180, 180, 210)
         btn.TextSize = Device.FontSize - 1
@@ -417,6 +326,7 @@ function Hub:CreateWindow(name, customWidth, customHeight)
         MakeRounded(btn, 6)
         btn.Parent = self.tabList
         
+        -- Create NEW content container for this tab
         local tabContent = Instance.new("ScrollingFrame")
         tabContent.Size = UDim2.new(1, -20, 1, -20)
         tabContent.Position = UDim2.new(0, 10, 0, 10)
@@ -432,7 +342,7 @@ function Hub:CreateWindow(name, customWidth, customHeight)
         contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
         contentLayout.Parent = tabContent
         
-        -- FIXED: Proper canvas sizing without overlay issues
+        -- Update canvas size when content changes
         local function updateCanvas()
             task.defer(function()
                 tabContent.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
@@ -440,32 +350,27 @@ function Hub:CreateWindow(name, customWidth, customHeight)
         end
         
         contentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateCanvas)
-        -- Also update when tab becomes visible
-        tabContent:GetPropertyChangedSignal("Visible"):Connect(function()
-            if tabContent.Visible then
-                updateCanvas()
-            end
-        end)
         
-        -- FIXED: Tab switching with proper visibility
+        -- FIXED: Proper tab switching - CLEARLY hide all others first
         local function selectTab()
-            -- Hide all other tabs first
-            for _, t in pairs(self.tabs) do
-                if t.content then
-                    t.content.Visible = false
+            -- CRITICAL FIX: Hide EVERY other tab's content FIRST
+            for _, existingTab in pairs(self.tabs) do
+                if existingTab.content then
+                    existingTab.content.Visible = false
+                    existingTab.content.Visible = false -- Double ensure
                 end
-                if t.button then
-                    Tween(t.button, {BackgroundColor3 = Color3.fromRGB(0, 0, 0), TextColor3 = Color3.fromRGB(180, 180, 210)}, 0.1)
-                    t.button.BackgroundTransparency = 1
+                if existingTab.button then
+                    existingTab.button.BackgroundTransparency = 1
+                    existingTab.button.TextColor3 = Color3.fromRGB(180, 180, 210)
                 end
             end
             
-            -- Show this tab
+            -- Now show THIS tab
             tabContent.Visible = true
-            Tween(btn, {BackgroundColor3 = Color3.fromRGB(40, 40, 70), TextColor3 = Color3.fromRGB(255, 255, 255)}, 0.1)
             btn.BackgroundTransparency = 0.1
+            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
             
-            -- Force canvas update
+            -- Update canvas
             updateCanvas()
         end
         
@@ -479,6 +384,9 @@ function Hub:CreateWindow(name, customWidth, customHeight)
             elements = {}
         }
         
+        -- ====================================================================
+        -- SECTION CREATION
+        -- ====================================================================
         function tab:AddSection(title)
             local sectionFrame = Instance.new("Frame")
             sectionFrame.Size = UDim2.new(1, 0, 0, 0)
@@ -520,6 +428,7 @@ function Hub:CreateWindow(name, customWidth, customHeight)
                 elements = {}
             }
             
+            -- Button
             function section:AddButton(text, callback)
                 local btn = Instance.new("TextButton")
                 btn.Size = UDim2.new(1, 0, 0, Device.ButtonHeight)
@@ -532,26 +441,16 @@ function Hub:CreateWindow(name, customWidth, customHeight)
                 MakeStroke(btn, 1, Color3.fromRGB(80, 80, 120))
                 btn.Parent = elementsFrame
                 
-                btn.MouseEnter:Connect(function()
-                    Tween(btn, {BackgroundColor3 = Color3.fromRGB(55, 55, 85)}, 0.1)
-                end)
-                
-                btn.MouseLeave:Connect(function()
-                    Tween(btn, {BackgroundColor3 = Color3.fromRGB(35, 35, 55)}, 0.1)
-                end)
-                
-                btn.MouseButton1Click:Connect(function()
-                    if callback then callback() end
-                end)
-                
-                btn.TouchTap:Connect(function()
-                    if callback then callback() end
-                end)
+                btn.MouseEnter:Connect(function() Tween(btn, {BackgroundColor3 = Color3.fromRGB(55, 55, 85)}, 0.1) end)
+                btn.MouseLeave:Connect(function() Tween(btn, {BackgroundColor3 = Color3.fromRGB(35, 35, 55)}, 0.1) end)
+                btn.MouseButton1Click:Connect(function() if callback then callback() end end)
+                btn.TouchTap:Connect(function() if callback then callback() end end)
                 
                 table.insert(section.elements, btn)
                 return btn
             end
             
+            -- Toggle
             function section:AddToggle(text, default, callback)
                 local frame = Instance.new("Frame")
                 frame.Size = UDim2.new(1, 0, 0, Device.ButtonHeight)
@@ -598,15 +497,33 @@ function Hub:CreateWindow(name, customWidth, customHeight)
                 toggleBtn.MouseButton1Click:Connect(toggle)
                 toggleBtn.TouchTap:Connect(toggle)
                 
-                table.insert(section.elements, {frame = frame, toggle = toggleBtn, state = state})
-                return {setValue = function(v) 
-                    state = v
-                    toggleBtn.BackgroundColor3 = state and Color3.fromRGB(100, 100, 255) or Color3.fromRGB(80, 80, 120)
-                    knob.Position = UDim2.new(0, state and 26 or 2, 0.5, -11)
-                    if callback then callback(state) end
-                end}
+                table.insert(section.elements, frame)
+                return {
+                    setValue = function(v)
+                        state = v
+                        toggleBtn.BackgroundColor3 = state and Color3.fromRGB(100, 100, 255) or Color3.fromRGB(80, 80, 120)
+                        knob.Position = UDim2.new(0, state and 26 or 2, 0.5, -11)
+                        if callback then callback(state) end
+                    end
+                }
             end
             
+            -- Label
+            function section:AddLabel(text)
+                local label = Instance.new("TextLabel")
+                label.Size = UDim2.new(1, 0, 0, 25)
+                label.Text = text
+                label.TextColor3 = Color3.fromRGB(180, 180, 210)
+                label.TextSize = Device.FontSize - 2
+                label.Font = Enum.Font.Gotham
+                label.TextXAlignment = Enum.TextXAlignment.Left
+                label.BackgroundTransparency = 1
+                label.Parent = elementsFrame
+                table.insert(section.elements, label)
+                return label
+            end
+            
+            -- Slider
             function section:AddSlider(text, min, max, default, callback)
                 local frame = Instance.new("Frame")
                 frame.Size = UDim2.new(1, 0, 0, 75)
@@ -697,16 +614,19 @@ function Hub:CreateWindow(name, customWidth, customHeight)
                 end)
                 
                 table.insert(section.elements, frame)
-                return {setValue = function(v) 
-                    value = math.clamp(v, min, max)
-                    local p = (value - min) / (max - min)
-                    valueLabel.Text = tostring(value)
-                    fill.Size = UDim2.new(p, 0, 1, 0)
-                    knob.Position = UDim2.new(p, -9, 0.5, -9)
-                    if callback then callback(value) end
-                end}
+                return {
+                    setValue = function(v)
+                        value = math.clamp(v, min, max)
+                        local p = (value - min) / (max - min)
+                        valueLabel.Text = tostring(value)
+                        fill.Size = UDim2.new(p, 0, 1, 0)
+                        knob.Position = UDim2.new(p, -9, 0.5, -9)
+                        if callback then callback(value) end
+                    end
+                }
             end
             
+            -- Dropdown
             function section:AddDropdown(text, options, default, callback)
                 local frame = Instance.new("Frame")
                 frame.Size = UDim2.new(1, 0, 0, Device.ButtonHeight)
@@ -771,7 +691,6 @@ function Hub:CreateWindow(name, customWidth, customHeight)
                     for _, opt in ipairs(options) do
                         local optBtn = Instance.new("TextButton")
                         optBtn.Size = UDim2.new(1, -10, 0, 32)
-                        optBtn.Position = UDim2.new(0, 5, 0, height)
                         optBtn.Text = opt
                         optBtn.TextColor3 = Color3.fromRGB(200, 200, 220)
                         optBtn.TextSize = Device.FontSize - 2
@@ -798,8 +717,6 @@ function Hub:CreateWindow(name, customWidth, customHeight)
                     if listVisible and input.UserInputType == Enum.UserInputType.MouseButton1 then
                         local mousePos = input.Position
                         local btnPos = dropdownBtn.AbsolutePosition
-                        local listPos = list and list.AbsolutePosition
-                        
                         if not (mousePos.X >= btnPos.X and mousePos.X <= btnPos.X + 100 and
                                mousePos.Y >= btnPos.Y and mousePos.Y <= btnPos.Y + 32) then
                             if list then list:Destroy() end
@@ -809,43 +726,28 @@ function Hub:CreateWindow(name, customWidth, customHeight)
                 end)
                 
                 table.insert(section.elements, frame)
-                return {setValue = function(val)
-                    dropdownBtn.Text = val
-                    if callback then callback(val) end
-                end}
+                return {
+                    setValue = function(val)
+                        dropdownBtn.Text = val
+                        if callback then callback(val) end
+                    end
+                }
             end
             
-            function section:AddLabel(text)
-                local label = Instance.new("TextLabel")
-                label.Size = UDim2.new(1, 0, 0, 25)
-                label.Position = UDim2.new(0, 12, 0, 0)
-                label.Text = text
-                label.TextColor3 = Color3.fromRGB(180, 180, 210)
-                label.TextSize = Device.FontSize - 2
-                label.Font = Enum.Font.Gotham
-                label.TextXAlignment = Enum.TextXAlignment.Left
-                label.BackgroundTransparency = 1
-                label.Parent = elementsFrame
-                table.insert(section.elements, label)
-                return label
-            end
-            
-            table.insert(tab.elements, section)
             return section
         end
         
         table.insert(self.tabs, tab)
         
-        -- Auto-select first tab if this is the first one added
+        -- Auto-select first tab
         if #self.tabs == 1 then
-            tabContent.Visible = true
-            Tween(btn, {BackgroundColor3 = Color3.fromRGB(40, 40, 70), TextColor3 = Color3.fromRGB(255, 255, 255)}, 0.1)
-            btn.BackgroundTransparency = 0.1
+            selectTab()
         end
         
         return tab
     end
     
+    -- Helper: Add user info frame
     function window:AddUserInfo()
         local frame = Instance.new("Frame")
         frame.Size = UDim2.new(1, -20, 0, 90)
@@ -867,7 +769,6 @@ function Hub:CreateWindow(name, customWidth, customHeight)
         avatarText.Size = UDim2.new(1, 0, 1, 0)
         avatarText.Text = "👤"
         avatarText.TextSize = 28
-        avatarText.TextColor3 = Color3.fromRGB(255, 255, 255)
         avatarText.BackgroundTransparency = 1
         avatarText.Parent = avatar
         
@@ -911,59 +812,30 @@ function Hub:CreateWindow(name, customWidth, customHeight)
         Notify(title, msg, typ, duration)
     end
     
-    function window:ShowLoading(message, duration)
-        return ShowLoading(message, duration)
-    end
-    
     function window:GetDeviceInfo()
         return Device.Type, Device.RecommendedWidth, Device.RecommendedHeight
     end
     
-    function window:ClearTabs()
-        for _, tab in pairs(self.tabs) do
-            if tab.button then tab.button:Destroy() end
-            if tab.content then tab.content:Destroy() end
-        end
-        self.tabs = {}
-        self.currentTab = nil
-    end
-    
     table.insert(Hub.windows, window)
-    Hub.currentWindow = window
-    
     return window
 end
 
 -- ============================================================================
--- CREATE THE EMPTY HUB (NO PRE-MADE TABS/SECTIONS)
--- ============================================================================
-
-local autoWidth, autoHeight = Device.GetWindowSize(Device)
-
-print("========================================")
-print("FUBNIK v6.0 - LOADER FRAMEWORK ACTIVE")
-print("Device: " .. Device.Type)
-print("Screen: " .. Device.ScreenWidth .. "x" .. Device.ScreenHeight)
-print("Window: " .. autoWidth .. "x" .. autoHeight)
-print("Hub is EMPTY - Ready for scripts to populate")
-print("========================================")
-
--- Create EMPTY window (no tabs, no sections, nothing pre-made)
-local HubWindow = Hub:CreateWindow("FUBNIK Hub")
-
--- Optional: Add a welcome notification
-HubWindow:Notify("FUBNIK Loader Ready", "Add tabs using: HubWindow:AddTab('Name', 'icon')", "success", 4)
-
--- ============================================================================
--- EXPOSE GLOBALLY FOR OTHER SCRIPTS TO USE
+-- EXPOSE MODULE (NO PRE-MADE HUB!)
 -- ============================================================================
 _G.FUBNIK = {
-    Hub = Hub,
+    CreateWindow = function(name, width, height) 
+        return Hub:CreateWindow(name, width, height) 
+    end,
     Device = Device,
-    Window = HubWindow,
-    Notify = Notify,
-    ShowLoading = ShowLoading
+    Notify = Notify
 }
 
-print("FUBNIK v6.0 Loader Framework Ready!")
-print("Use _G.FUBNIK.Window:AddTab('My Tab', '🔥') to add tabs")
+print("========================================")
+print("FUBNIK v6.1 - GUI MODULE LOADED")
+print("Create your hub: _G.FUBNIK:CreateWindow('My Hub')")
+print("NO pre-made tabs - Build what YOU want!")
+print("========================================")
+
+-- Return the module for loadstring users
+return _G.FUBNIK
